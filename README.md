@@ -1,0 +1,2 @@
+# SmarTest
+Proiect Inteligenta Artificiala

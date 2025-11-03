@@ -1,0 +1,12 @@
+{
+  "source": "C:\\Users\\Tudor\\Desktop\\SmarTest\\assets\\pdfs\\examene\\examen.pdf",
+  "count": 6,
+  "questions": [
+    "1. (1p) Care este tipul de Inteligență Artificială, dintre cele menţionate în primul curs, care ar fi potrivit pentru un sistem de dialog de tipul ChatGPT? Justificați.",
+    "2. Fie următoarea problemă: Avem o matrice 3x3 cu toate celulele goale. Având la dispoziție o cantitate nelimitată de piese de două tipuri (X și O), să se găsească o secvență de plasări alternative de piese de cele două tipuri, începând cu X, astfel încât matricea să aibă o piesă în fiecare celulă. Dacă la un moment dat pe o line, coloană sau diagonală din matrice există trei piese identice, nu mai putem plasa nici o piesă în matrice. a) (",
+    "0.5p) Care este dimensiunea minimă a spațiului problemei (numărul minim de stări distincte, indiferent de reprezentarea aleasă)? b) (",
+    "0.5p) Care din strategiile discutate în cursurile 2 și 3 ar fi potrivită pentru această problemă? Justificați. c) (1p) Implementați o euristică ce permite strategiei Hillclimbing să găsească soluție la această problemă.",
+    "3. (1p) Pentru jocul de mai jos, există echilibre Nash pure? Justificați. A B a b c a 1 2 2 3 1 1 b 2 2 3 3 1 1",
+    "4. (1p) Există situații în care o parte din cunoașterea specifică unui domeniu nu poate fi reprezentată într-o ontologie? Justificați și exemplificați."
+  ]
+}

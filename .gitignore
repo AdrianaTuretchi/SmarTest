@@ -1,0 +1,15 @@
+# Mediul virtual
+venv/
+/venv/
+
+# Fișiere cache Python
+__pycache__/
+*.pyc
+
+# Fișiere OS
+.DS_Store
+Thumbs.db
+
+# Fișiere IDE
+.vscode/
+.idea/

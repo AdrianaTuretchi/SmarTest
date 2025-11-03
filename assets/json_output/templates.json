@@ -1,0 +1,11 @@
+[
+  {
+    "id": "nash-5",
+    "template": "3. (1p) Pentru jocul de mai jos, există echilibre Nash pure? Justificați.",
+    "source_text_for_debug": "3. (1p) Pentru jocul de mai jos, există echilibre Nash pure? Justificați. A B a b c a 1 2 2 3 1 1 b 2 2 3 3 1 1",
+    "tags": [
+      "nash",
+      "game-theory"
+    ]
+  }
+]

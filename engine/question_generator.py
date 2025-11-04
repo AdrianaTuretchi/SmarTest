@@ -102,3 +102,5 @@ class QuestionGenerator:
             "raw_data": raw_matrix,  # crucial pentru pasul următor
             "template_id": template_id
         }
+
+

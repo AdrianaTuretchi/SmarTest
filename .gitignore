@@ -13,3 +13,16 @@ Thumbs.db
 # Fișiere IDE
 .vscode/
 .idea/
+
+# Fișiere de configurare locale (Environment variables)
+.env
+
+# Fișiere generate (dacă aplicația va salva PDF-uri local temporar)
+*.log
+generated_pdfs/
+temp/
+
+# Coverage (dacă vei face teste unitare pe viitor)
+.pytest_cache/
+htmlcov/
+.coverage

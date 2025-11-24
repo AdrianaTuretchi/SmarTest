@@ -1,22 +1,22 @@
 import re
 from typing import List, Tuple
+from core_logic.nash_logic import find_pure_nash
 
-class EvaluationEngine:
+
+class NashEvaluator:
     def __init__(self):
         pass
 
     def _extract_coordinates(self, answer: str) -> List[Tuple[int, int]]:
-        """
-        Extrage toate coordonatele de forma (r, c) dintr-un string.
-        """
         pattern = r"\((\d+),\s*(\d+)\)"
         matches = re.findall(pattern, answer)
         return [(int(r), int(c)) for r, c in matches]
 
-    def evaluate_nash_answer(self, user_answer: str, correct_coords: List[Tuple[int, int]]) -> float:
+    def evaluate(self, user_answer: str, raw_data: List[List[Tuple[int, int]]]) -> float:
         """
-        Compară răspunsul utilizatorului cu soluția corectă și returnează un scor între 0 și 1.
+        Evaluate a Nash-style answer. Returns float score between 0 and 1.
         """
+        correct_coords = find_pure_nash(raw_data)
         user_coords = self._extract_coordinates(user_answer)
 
         if not user_coords:

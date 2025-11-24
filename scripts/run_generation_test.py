@@ -9,8 +9,8 @@ if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
 # Importăm modulele pe care vrem să le testăm (acum că project_root e în sys.path)
-from engine.question_generator import QuestionGenerator
-from core_logic.nash_equilibrium import find_pure_nash
+from engine.question_service import QuestionService
+from core_logic.nash_logic import find_pure_nash
 
 def main_test():
     """
@@ -24,7 +24,7 @@ def main_test():
     templates_path = project_root.joinpath("assets", "json_output", "templates.json")
 
     # 1. Inițializează generatorul
-    q_generator = QuestionGenerator(templates_path)
+    q_generator = QuestionService(templates_path)
 
     # 2. Generează mai multe întrebări de tip 'nash' (ex: 5)
     num_to_generate = 5

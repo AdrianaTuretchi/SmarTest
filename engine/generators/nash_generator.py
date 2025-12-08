@@ -1,13 +1,20 @@
 import random
-from typing import List, Tuple, Dict, Any
+from typing import List, Tuple, Dict, Any, Optional
 
 Matrix = List[List[Tuple[int, int]]]
 
 
 class NashGenerator:
+    # Tags that trigger data generation
+    DATA_TRIGGER_TAGS = {'requires_calculation', 'hybrid'}
+    
     def __init__(self, templates: Dict[str, Dict[str, Any]]):
         # templates: mapping id -> template dict
-        self.templates = templates or {}
+        # Filter only Nash templates (those with 'nash' in tags)
+        self.nash_templates = {
+            tid: tmpl for tid, tmpl in (templates or {}).items()
+            if 'nash' in tmpl.get('tags', [])
+        }
 
     def _generate_nash_data(self) -> Matrix:
         rows = random.randint(2, 3)
@@ -25,7 +32,7 @@ class NashGenerator:
         return matrix
 
     def _format_matrix_as_string(self, matrix: Matrix) -> str:
-        matrix_str = "\nMatricea de plăți (Jucător 1: rânduri, Jucător 2: coloane):\n"
+        matrix_str = "\nMatricea de plati (Jucator 1: randuri, Jucator 2: coloane):\n"
         matrix_str += "--------------------------------------------------\n"
 
         for row in matrix:
@@ -36,18 +43,31 @@ class NashGenerator:
         return matrix_str
 
     def generate(self) -> Dict[str, Any]:
-        if not self.templates:
+        if not self.nash_templates:
             return {"error": "Nu s-au găsit șabloane pentru tipul 'nash'."}
 
-        template_id = random.choice(list(self.templates.keys()))
-        template_text = self.templates[template_id]['template']
-
-        raw_matrix = self._generate_nash_data()
-        formatted_matrix_str = self._format_matrix_as_string(raw_matrix)
-        final_question_text = template_text + "\n" + formatted_matrix_str
+        # Select template
+        template_id = random.choice(list(self.nash_templates.keys()))
+        selected_template = self.nash_templates[template_id]
+        template_text = selected_template['template']
+        template_tags = set(selected_template.get('tags', []))
+        
+        # Check if data generation is needed
+        needs_data = bool(template_tags & self.DATA_TRIGGER_TAGS)
+        
+        if needs_data:
+            # Generate and append data for calculation-based questions
+            raw_matrix = self._generate_nash_data()
+            formatted_matrix_str = self._format_matrix_as_string(raw_matrix)
+            final_question_text = template_text + "\n" + formatted_matrix_str
+            raw_data = raw_matrix
+        else:
+            # Pure theory question - no data generation
+            final_question_text = template_text
+            raw_data = None
 
         return {
             "question_text": final_question_text,
-            "raw_data": raw_matrix,
+            "raw_data": raw_data,
             "template_id": template_id,
         }

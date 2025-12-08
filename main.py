@@ -66,11 +66,11 @@ def evaluate_nash(payload: NashSubmission):
         raise HTTPException(status_code=400, detail=f"Invalid raw_data: {e}")
 
     try:
-        score = evaluator_service.evaluate('nash', payload)
+        score, feedback_text = evaluator_service.evaluate('nash', payload)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-    return EvaluationResponse(score=score, correct_coords=correct_coords)
+    return EvaluationResponse(score=score, correct_coords=correct_coords, feedback_text=feedback_text)
 
 
 @app.get("/generate/csp", response_model=CSPQuestionResponse)
@@ -110,11 +110,11 @@ def evaluate_csp(payload: CSPSubmission):
 
     # evaluate via EvaluationService
     try:
-        score = evaluator_service.evaluate('csp', payload)
+        score, feedback_text = evaluator_service.evaluate('csp', payload)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-    return CSPEvaluationResponse(score=score, correct_assignment=correct or {})
+    return CSPEvaluationResponse(score=score, correct_assignment=correct or {}, feedback_text=feedback_text)
 
 
 @app.get("/generate/minmax", response_model=MinMaxQuestionResponse)
@@ -148,8 +148,8 @@ def evaluate_minmax(payload: MinMaxSubmission):
         raise HTTPException(status_code=400, detail=f"Invalid raw_data: {e}")
 
     try:
-        score = evaluator_service.evaluate('minmax', payload)
+        score, feedback_text = evaluator_service.evaluate('minmax', payload)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-    return MinMaxEvaluationResponse(score=score, correct_root_value=correct_root, correct_visited_count=correct_visited)
+    return MinMaxEvaluationResponse(score=score, correct_root_value=correct_root, correct_visited_count=correct_visited, feedback_text=feedback_text)

@@ -18,6 +18,7 @@ class NashSubmission(BaseModel):
 class EvaluationResponse(BaseModel):
     score: float
     correct_coords: List[Tuple[int, int]]
+    feedback_text: Optional[str] = None
 
 
 class CSPQuestionResponse(BaseModel):
@@ -34,6 +35,7 @@ class CSPSubmission(BaseModel):
 class CSPEvaluationResponse(BaseModel):
     score: float
     correct_assignment: Dict[str, int]
+    feedback_text: Optional[str] = None
 
 
 class MinMaxQuestionResponse(BaseModel):
@@ -52,3 +54,4 @@ class MinMaxEvaluationResponse(BaseModel):
     score: float
     correct_root_value: int
     correct_visited_count: int
+    feedback_text: Optional[str] = None

@@ -123,3 +123,29 @@ def segment_questions(cleaned_text: str) -> List[str]:
             cleaned_questions.append(q_stripped)
 
     return cleaned_questions
+
+
+def normalize_ro_diacritics(text: str) -> str:
+    """
+    Normalizează diacriticele românești înlocuindu-le cu echivalente ASCII.
+    
+    Acest lucru rezolvă problemele de encoding vizual cauzate de caractere speciale.
+    
+    Args:
+        text: textul cu diacritice românești
+        
+    Returns:
+        textul cu caractere ASCII normalizate
+    """
+    diacritics_map = {
+        'ă': 'a', 'Ă': 'A',
+        'â': 'a', 'Â': 'A',
+        'î': 'i', 'Î': 'I',
+        'ș': 's', 'Ș': 'S', 'ş': 's', 'Ş': 'S',
+        'ț': 't', 'Ț': 'T', 'ţ': 't', 'Ţ': 'T'
+    }
+    
+    for diacritic, replacement in diacritics_map.items():
+        text = text.replace(diacritic, replacement)
+    
+    return text

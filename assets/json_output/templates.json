@@ -1,11 +1,114 @@
 [
   {
-    "id": "nash-5",
-    "template": "3. (1p) Pentru jocul de mai jos, există echilibre Nash pure?",
-    "source_text_for_debug": "3. (1p) Pentru jocul de mai jos, există echilibre Nash pure? Justificați. A B a b c a 1 2 2 3 1 1 b 2 2 3 3 1 1",
+    "id": "nash-1",
+    "template": "Pentru jocul de mai jos (reprezentat prin matricea de plăți) există echilibru Nash pur? În caz contrar, sugerați modificări necesare pentru a exista.",
+    "source_text_for_debug": "5. (1p) Pentru jocul de mai jos exista echilibru Nash pur? In caz contrar, sugerati modificari necesare pentru a exista. John Mary Eat Sleep Eat 5 2 4 4 Sleep 4 3 2 4",
     "tags": [
       "nash",
-      "game-theory"
-    ]
+      "game-theory",
+      "hybrid"
+    ],
+    "source_file": "examen_13_02_22_X.pdf"
+  },
+  {
+    "id": "csp-2",
+    "template": "Considerăm o problemă de satisfacere a restricțiilor definită de variabilele și domeniile de mai jos. Aplicați algoritmul Backtracking + Forward checking + MRV (Minimum remaining values) pentru a identifica o soluție sau inconsistența.",
+    "source_text_for_debug": "1.5p)Consideram urmatorul graf de constrangeriasociat unei probleme de satisfacere a restrictiilor. Variabilele au urmatoarele domenii: A: {2}, B: {1,2}, C: {0, 1, 2}, D: {0, 1, 2}, E: {1, 2}. Aplicati algoritmul Backtracking + Forward checking + MRV (Minimum remaining values) pentru a identifica o solutie sau inconsistenta.",
+    "tags": [
+      "csp",
+      "constraint-satisfaction",
+      "requires_calculation"
+    ],
+    "source_file": "examen_22_06_22_spec.pdf"
+  },
+  {
+    "id": "csp-3",
+    "template": "Considerăm următoarea problemă de satisfacere a restricțiilor descrisă prin variabilele, domeniile și constrângerile de mai jos:",
+    "source_text_for_debug": "1.5p)Consideram urmatoarea problema de satisfacerea restrictiilor: variabilele X, Y, Z cu domeniile: X: {1, 2, ...10}, Y: {5, 6, ...15}, Z: {5, 6, ...20} si restrictiile X > Y, Y + Z = 12, X + Z =",
+    "tags": [
+      "csp",
+      "constraint-satisfaction",
+      "requires_calculation"
+    ],
+    "source_file": "examen_30_01_22_A.pdf"
+  },
+  {
+    "id": "minmax-4",
+    "template": "Pentru arborele MinMax generat mai jos, aplicați algoritmul cu optimizarea Alpha-Beta și stabiliți valoarea rădăcinii.",
+    "source_text_for_debug": "5. (1p) Dati exemplu de arbore MINIMAX pe doua nivele (un MIN si un MAX) in care optimizarea AlphaBeta ar elimina exact un test suplimentar.",
+    "tags": [
+      "minmax",
+      "alpha-beta",
+      "game-tree",
+      "requires_calculation"
+    ],
+    "source_file": "examen_30_01_22_A.pdf"
+  },
+  {
+    "id": "csp-5",
+    "template": "Considerăm o problemă CSP cu variabilele și domeniile specificate mai jos. Considerând asignarea parțială dată, aplicați algoritmul Forward checking pentru a identifica o soluție sau inconsistența.",
+    "source_text_for_debug": "1.5p)Consideram problema celor 4-regine: scopuleste asezarea reginelor pe o tabla 4x4 astfel incat acestea sa nu se atace. Modelam aceasta problema ca o problema de satisfacere a restrictiilor astfel: variabilele Q1, Q2, Q3, Q4 (coloanele), cu domeniile {1, 2, 3, 4} (liniile). Consideram asignarea partiala Q1=2 (regina 1 este asezata pe linia 2, coloana 1). Aplicati algoritmul Forward checking pentru a identifica o solutie, sau inconsistenta.",
+    "tags": [
+      "csp",
+      "constraint-satisfaction",
+      "requires_calculation"
+    ],
+    "source_file": "examen_30_01_22_B.pdf"
+  },
+  {
+    "id": "nash-6",
+    "template": "Pentru jocul de mai jos există strategii dominate pentru cel puțin unul din cei doi jucători? Dar echilibre Nash pure?",
+    "source_text_for_debug": "5. (1p) Pentru jocul de mai jos exista strategii dominate pentru cel putin unul din cei doi jucatori? Dar echilibre Nash pure? Mario Luigi Jump Stay Run Jump 3 1 2 3 1 4 Stay 1 1 4 2 1 4",
+    "tags": [
+      "nash",
+      "game-theory",
+      "requires_calculation"
+    ],
+    "source_file": "examen_30_01_22_B.pdf"
+  },
+  {
+    "id": "csp-7",
+    "template": "Considerăm o problemă CSP definită de datele de mai jos. Utilizați euristica MRV și algoritmul FC pentru a identifica o soluție sau inconsistența. Precizați complexitatea algoritmului.",
+    "source_text_for_debug": "1.5p) Consideram harta de mai jos cu cele 4 regiuni: A, B, C, D. Fiecare regiune poate fi colorata utilizand culorile rosu, albastru sau verde a.i. oricare doua regiuni vecine sa fie colorate diferit. Utilizati euristica MRV si algoritmul FC pentru a identifica o solutie sau inconsistenta. Precizati care este complexitatea algoritmului de cautare pentru o harta cu d regiuni si m culori posibile.",
+    "tags": [
+      "csp",
+      "constraint-satisfaction",
+      "hybrid"
+    ],
+    "source_file": "Examen_31_01_24_A.pdf"
+  },
+  {
+    "id": "csp-8",
+    "template": "Considerăm următoarea problemă de satisfacere a restricțiilor cu variabilele definite mai jos:",
+    "source_text_for_debug": "1.5p) Consideram urmatoarea problema de satisfacere a restrictiilor cu variabilele v1, v2, v",
+    "tags": [
+      "csp",
+      "constraint-satisfaction",
+      "requires_calculation"
+    ],
+    "source_file": "Examen_31_01_24_B.pdf"
+  },
+  {
+    "id": "csp-9",
+    "template": "Date fiind variabilele și restricțiile de mai jos, aplicați algoritmul Arc consistency pentru a actualiza valorile variabilelor. Specificați dacă problema este inconsistentă.",
+    "source_text_for_debug": "3. Graful de restrictii este reprezentat mai jos (valorile variabilelor sunt in noduri, iar restrictiile sunt reprezentate pe muchii). Aplicati algoritmul Arc consistency pentru a actualiza valorile variabilelor. Specificati daca problema este inconsistenta.",
+    "tags": [
+      "csp",
+      "constraint-satisfaction",
+      "requires_calculation"
+    ],
+    "source_file": "Examen_31_01_24_B.pdf"
+  },
+  {
+    "id": "minmax-10",
+    "template": "Pentru arborele de joc generat mai jos, aplicați strategia MIN-MAX. Determinați valoarea rădăcinii și numărul de noduri vizitate.",
+    "source_text_for_debug": "3. (1p) Daca am reformula problema de la punctul 2, adaugand un al doilea jucator care poate plasa piesele O, primul putand plasa doar piesele X, am obtine un joc. Daca la terminarea jocului exista trei piese X pe o linie, coloana sau diagonala, primul jucator castiga, daca exista trei piese O pe o linie, coloana sau diagonala, al doilea jucator castiga, altfel jocul se termina ca remiza. Pentru acest joc propuneti o euristica ce permite strategiei MIN-MAX sa functioneze ca mecanism de decizie pentru primul jucator.",
+    "tags": [
+      "minmax",
+      "alpha-beta",
+      "game-tree",
+      "requires_calculation"
+    ],
+    "source_file": "Examen_4_01_25_A_IP.pdf"
   }
 ]

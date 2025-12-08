@@ -1,6 +1,7 @@
 cffi==2.0.0
 charset-normalizer==3.4.4
 cryptography==46.0.3
+deep-translator==1.11.4
 pdfminer.six==20250506
 pdfplumber==0.11.7
 pillow==12.0.0

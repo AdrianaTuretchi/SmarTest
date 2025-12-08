@@ -1,6 +1,8 @@
 import os
 import sys
 from pathlib import Path
+import json
+from typing import List, Dict, Set
 
 # Asiguram ca radacina proiectului este in sys.path atunci cand scriptul
 # este rulat din folderul `scripts/`. Fara asta, importul `utils` nu
@@ -12,73 +14,158 @@ if str(project_root) not in sys.path:
 # Importam functiile pe care tocmai le-am creat
 from utils.pdf_parser import extract_text_from_pdf
 from utils.text_cleaner import clean_raw_text, segment_questions
-import json
 from engine.template_miner import process_raw_questions
 
-def main_extraction_test():
+
+def process_single_pdf(pdf_path: Path) -> List[Dict]:
     """
-    Functie principala pentru a testa fluxul de extragere si curatare.
+    Procesează un singur PDF și returnează lista de șabloane extrase.
+    
+    Args:
+        pdf_path: Calea către fișierul PDF
+        
+    Returns:
+        Lista de șabloane (dict-uri cu id, template, tags, etc.)
     """
-    print("--- Incepem testul de extragere PDF ---")
-
-    # --- PASUL 1: Defineste un fisier de test ---
-    # Asigura-te ca ai adaugat un fisier aici!
-    test_file_name = "examen.pdf"
-    # Construim calea absoluta din radacina proiectului, astfel incat
-    # scriptul sa functioneze indiferent din ce director este apelat.
-    test_file_path = project_root.joinpath("assets", "pdfs", "examene", test_file_name)
-
-    # --- PASUL 2: Extrage textul brut ---
-    print(f"Se extrage textul din: {test_file_path}")
-    # pdf_parser asteapta un str, nu un Path, si verifica existenta fisierului
-    raw_text = extract_text_from_pdf(str(test_file_path))
-
+    print(f"\n{'='*60}")
+    print(f"Procesare: {pdf_path.name}")
+    print('='*60)
+    
+    # Extrage textul brut
+    raw_text = extract_text_from_pdf(str(pdf_path))
+    
     if "Eroare:" in raw_text:
-        print(raw_text)
-        return
-
-    # Afisam tot textul brut extras (poate fi lung) pentru inspectie
-    print("Textul brut extras:\n")
-    print(raw_text)
-    print("\n" + "="*50 + "\n")
-
-    # --- PASUL 3: Curata textul ---
-    print("Se curata textul...")
+        print(f"  ⚠️  Eroare la extragere: {raw_text}")
+        return []
+    
+    print(f"  ✓ Text extras ({len(raw_text)} caractere)")
+    
+    # Curăță textul
     clean_text = clean_raw_text(raw_text)
-
-    print("Textul curatat:\n")
-    print(clean_text)
-
-    # --- PASUL 4: Segmentare intrebari (daca exista) ---
-    print("\nSe segmenteaza intrebari (daca se detecteaza):")
+    print(f"  ✓ Text curățat ({len(clean_text)} caractere)")
+    
+    # Segmentează întrebările
     questions = segment_questions(clean_text)
-    if questions:
-        print(f"Am detectat {len(questions)} intrebari. Afisare:")
-        for i, q in enumerate(questions, start=1):
-            print("\n--- INTREBARE", i, "---")
-            print(q)
+    
+    if not questions:
+        print("  ⚠️  Nu s-au detectat întrebări numerotate")
+        return []
+    
+    print(f"  ✓ Detectate {len(questions)} întrebări")
+    
+    # Extrage șabloanele
+    templates = process_raw_questions(questions)
+    print(f"  ✓ Extrase {len(templates)} șabloane")
+    
+    # Adaugă sursa la fiecare șablon
+    for tmpl in templates:
+        tmpl['source_file'] = pdf_path.name
+    
+    return templates
 
-        # Salvam intrebari in JSON in assets/json_output
+
+def deduplicate_templates(all_templates: List[Dict]) -> List[Dict]:
+    """
+    Deduplică șabloanele bazat pe textul șablonului normalizat.
+    
+    Args:
+        all_templates: Lista de șabloane de la toate PDF-urile
+        
+    Returns:
+        Lista dedupicată de șabloane
+    """
+    seen_templates: Set[str] = set()
+    unique_templates: List[Dict] = []
+    
+    for tmpl in all_templates:
+        # Normalizăm pentru comparare (lowercase, spații)
+        template_key = tmpl['template'].lower().strip()
+        
+        if template_key not in seen_templates:
+            seen_templates.add(template_key)
+            unique_templates.append(tmpl)
+        else:
+            # Șablonul este duplicat, îl omitem dar logăm
+            print(f"  ⓘ  Duplicat omis: {tmpl['id']} din {tmpl.get('source_file', 'unknown')}")
+    
+    return unique_templates
+
+
+def main_batch_extraction():
+    """
+    Funcție principală care procesează toate PDF-urile din assets/pdfs/examene/
+    și generează un fișier master templates.json.
+    """
+    print("\n" + "="*60)
+    print("  EXTRACȚIE BATCH - PROCESARE MULTIPLE PDF-URI")
+    print("="*60)
+    
+    # Calea către folderul cu examene
+    examene_dir = project_root.joinpath("assets", "pdfs", "examene")
+    
+    if not examene_dir.exists():
+        print(f"\n❌ Folderul {examene_dir} nu există!")
+        return
+    
+    # Găsește toate PDF-urile
+    pdf_files = sorted(examene_dir.glob("*.pdf"))
+    
+    if not pdf_files:
+        print(f"\n❌ Nu s-au găsit fișiere PDF în {examene_dir}")
+        return
+    
+    print(f"\n📄 Găsite {len(pdf_files)} fișiere PDF\n")
+    
+    # Procesează fiecare PDF și agregă șabloanele
+    all_templates: List[Dict] = []
+    
+    for pdf_path in pdf_files:
+        templates = process_single_pdf(pdf_path)
+        all_templates.extend(templates)
+    
+    print(f"\n{'='*60}")
+    print(f"Total șabloane extrase: {len(all_templates)}")
+    print('='*60)
+    
+    # Deduplicare
+    if all_templates:
+        print("\n🔍 Deduplicare șabloane...")
+        unique_templates = deduplicate_templates(all_templates)
+        print(f"✓ Șabloane unice: {len(unique_templates)}")
+        
+        # Re-indexare ID-uri pentru consistență
+        for idx, tmpl in enumerate(unique_templates, start=1):
+            # Păstrăm tipul din ID-ul original (nash-X, csp-X, minmax-X)
+            original_type = tmpl['id'].split('-')[0]
+            tmpl['id'] = f"{original_type}-{idx}"
+        
+        # Salvare rezultat final
         out_dir = project_root.joinpath("assets", "json_output")
         out_dir.mkdir(parents=True, exist_ok=True)
-        out_file = out_dir.joinpath(f"{test_file_name}_questions.json")
-        with open(out_file, "w", encoding="utf-8") as fh:
-            json.dump({"source": str(test_file_path), "count": len(questions), "questions": questions}, fh, ensure_ascii=False, indent=2)
-        print(f"\nIntrebările au fost salvate în: {out_file}")
-        # --- PASUL 5: Procesare sabloane (template mining) ---
-        try:
-            templates = process_raw_questions(questions)
-            templates_out = project_root.joinpath("assets", "json_output", "templates.json")
-            with open(templates_out, "w", encoding="utf-8") as tf:
-                json.dump(templates, tf, ensure_ascii=False, indent=2)
-            print(f"Șabloanele extrase au fost salvate în: {templates_out}")
-        except Exception as e:
-            print(f"Eroare la procesarea sabloanelor: {e}")
+        templates_out = out_dir.joinpath("templates.json")
+        
+        with open(templates_out, "w", encoding="utf-8") as tf:
+            json.dump(unique_templates, tf, ensure_ascii=False, indent=2)
+        
+        print(f"\n✅ Șabloane salvate în: {templates_out}")
+        
+        # Statistici pe categorii
+        stats = {}
+        for tmpl in unique_templates:
+            for tag in tmpl.get('tags', []):
+                stats[tag] = stats.get(tag, 0) + 1
+        
+        print("\n📊 Statistici pe categorii:")
+        for tag, count in sorted(stats.items()):
+            print(f"   {tag}: {count} șabloane")
     else:
-        print("Nu s-au detectat intrebari numerotate în text.")
+        print("\n⚠️  Nu s-au extras șabloane din niciun PDF")
+    
+    print("\n" + "="*60)
+    print("  EXTRACȚIE COMPLETATĂ")
+    print("="*60 + "\n")
 
-    print("\n--- Testul de extragere s-a incheiat ---")
 
 if __name__ == "__main__":
-    # Rulam functia principala doar cand scriptul este executat direct
-    main_extraction_test()
+    # Rulăm funcția principală doar când scriptul este executat direct
+    main_batch_extraction()

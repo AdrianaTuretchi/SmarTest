@@ -30,6 +30,7 @@ class CSPQuestionResponse(BaseModel):
 class CSPSubmission(BaseModel):
     user_answer: Dict[str, int]
     raw_data: Dict[str, Any]
+    template_id: Optional[str] = None
 
 
 class CSPEvaluationResponse(BaseModel):
@@ -54,4 +55,19 @@ class MinMaxEvaluationResponse(BaseModel):
     score: float
     correct_root_value: int
     correct_visited_count: int
+    feedback_text: Optional[str] = None
+
+
+class StrategySubmission(BaseModel):
+    user_answer: str
+    raw_data: Dict[str, Any]
+    template_id: Optional[str] = None
+
+class StrategyQuestionResponse(BaseModel):
+    question_text: str
+    raw_data: Dict[str, Any]
+    template_id: str
+
+class StrategyEvaluationResponse(BaseModel):
+    score: float
     feedback_text: Optional[str] = None

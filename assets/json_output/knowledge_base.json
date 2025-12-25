@@ -3,138 +3,180 @@
     "concept": "Echilibru Nash",
     "definition": "Un profil de strategie este un echilibru Nash dacă niciun jucător nu are un motiv să își schimbe unilateral strategia, atâta timp cât ceilalți jucători își mențin strategiile curente. Aceasta garantează câștiguri maxime posibile fiecărui jucător date fiind deciziile celorlalți.",
     "source": "IA_5_GT.pdf",
-    "tags": ["nash", "game-theory", "echilibru"]
+    "tags": ["nash", "game-theory", "echilibru", "nash-1", "nash-6", "use_nash"]
   },
   {
     "concept": "Strategie Dominantă",
     "definition": "O strategie este dominantă dacă oferă întotdeauna câștiguri cel puțin la fel de bune ca orice altă strategie, indiferent de deciziile adversarului. O strategie strict dominantă oferă câștiguri strict mai mari.",
     "source": "IA_5_GT.pdf",
-    "tags": ["nash", "game-theory", "strategie"]
+    "tags": ["nash", "game-theory", "strategie", "nash-6", "use_dominant_strategy"]
   },
   {
     "concept": "Optim Pareto",
     "definition": "O strategie este Pareto optimală dacă nicio schimbare nu poate îmbunătăți câștigul unui jucător fără a diminua câștigul altui jucător.",
     "source": "IA_5_GT.pdf",
-    "tags": ["game-theory", "pareto"]
+    "tags": ["game-theory", "pareto", "use_pareto"]
   },
   {
     "concept": "Joc de Sumă Nulă",
     "definition": "Un joc în care ceea ce câștigă un jucător este pierdut de celălalt (sau ceilalți). Suma totală a câștigurilor și pierderilor este zero.",
     "source": "IA_5_GT.pdf",
-    "tags": ["game-theory", "zero-sum"]
+    "tags": ["game-theory", "zero-sum", "use_zero_sum"]
   },
   {
     "concept": "Strategie MinMax",
     "definition": "O strategie de decizie pentru jocuri (de obicei de sumă nulă) în care jucătorul încearcă să își maximizeze câștigul minim garantat. Algoritmul presupune că adversarul joacă optim pentru a-și maximiza propriul câștig.",
     "source": "IA_5_GT.pdf",
-    "tags": ["minmax", "game-tree"]
+    "tags": ["minmax", "game-tree", "minmax-10", "use_minmax"]
   },
   {
     "concept": "Optimizarea Alpha-Beta",
     "definition": "O tehnică de optimizare a algoritmului MinMax care elimină ramurile din arborele de căutare ce nu pot influența decizia finală. Menține două valori: Alpha (cel mai bun scor maxim garantat) și Beta (cel mai bun scor minim garantat).",
     "source": "IA_5_GT.pdf",
-    "tags": ["minmax", "alpha-beta", "pruning"]
+    "tags": ["minmax", "alpha-beta", "pruning", "minmax-4", "use_alpha_beta"]
   },
   {
     "concept": "CSP (Probleme de Satisfacere a Constrângerilor)",
     "definition": "Probleme definite prin variabile (X), domenii de valori (D) și o mulțime de constrângeri (C). O soluție este o asignare completă care satisface toate constrângerile.",
     "source": "curs_CSP.pdf",
-    "tags": ["csp", "definitie"]
+    "tags": ["csp", "definitie", "use_csp"]
   },
   {
     "concept": "Backtracking",
     "definition": "Algoritmul de bază pentru CSP. Este o căutare DFS care asignează valori variabilelor una câte una. Folosește mecanismul 'fail-on-violation': dacă o asignare încalcă o constrângere, se întoarce imediat.",
     "source": "curs_CSP.pdf",
-    "tags": ["csp", "backtracking", "algoritm"]
+    "tags": ["csp", "use_backtracking", "algoritm", "csp-2", "csp-3", "csp-8"]
   },
   {
     "concept": "Forward Checking (FC)",
     "definition": "O tehnică de propagare a constrângerilor. Când se asignează o valoare, elimină imediat valorile inconsistente din domeniile variabilelor vecine neasignate. Previne asignări care garantează eșecul ulterior.",
     "source": "curs_CSP.pdf",
-    "tags": ["csp", "forward-checking", "fc"]
+    "tags": ["csp", "use_forward_checking", "csp-2", "csp-5", "csp-7"]
   },
   {
     "concept": "Arc Consistency (AC-3)",
     "definition": "Un arc X->Y este consistent dacă pentru fiecare valoare x din domeniul lui X, există o valoare permisă y în domeniul lui Y. Algoritmul AC-3 reduce domeniile variabilelor până când toate arcurile sunt consistente.",
     "source": "curs_CSP.pdf",
-    "tags": ["csp", "arc-consistency", "ac-3"]
+    "tags": ["csp", "arc-consistency", "use_ac-3", "csp-9"]
   },
   {
     "concept": "Euristica MRV (Minimum Remaining Values)",
     "definition": "O euristică de selectare a variabilelor, cunoscută și ca 'Fail-first'. Alege variabila care are cele mai puține valori legale rămase în domeniul său.",
     "source": "curs_CSP.pdf",
-    "tags": ["csp", "mrv", "euristica"]
+    "tags": ["csp", "use_mrv", "euristica", "csp-2", "csp-7"]
   },
   {
     "concept": "Euristica LCV (Least Constraining Value)",
     "definition": "O euristică de selectare a valorilor. Alege valoarea care exclude cele mai puține valori din domeniile variabilelor vecine, lăsând flexibilitate maximă pentru viitor.",
     "source": "curs_CSP.pdf",
-    "tags": ["csp", "lcv", "euristica"]
+    "tags": ["csp", "use_lcv", "euristica"]
   },
   {
     "concept": "BFS (Breadth First Search)",
     "definition": "Strategie de căutare neinformată care explorează nodurile în ordinea distanței față de starea inițială (nivel cu nivel). Găsește întotdeauna calea cea mai scurtă, dar consumă multă memorie.",
     "source": "IA_2_SBM_I.pdf",
-    "tags": ["search", "bfs", "uninformed"]
+    "tags": ["search", "bfs", "uninformed", "use_bfs"]
   },
   {
     "concept": "DFS (Depth First Search)",
     "definition": "Strategie de căutare neinformată care explorează o ramură cât mai adânc posibil înainte de a se întoarce (backtrack). Este eficientă spațial, dar nu garantează găsirea soluției optime și poate intra în bucle infinite.",
     "source": "IA_2_SBM_I.pdf",
-    "tags": ["search", "dfs", "uninformed"]
+    "tags": ["search", "dfs", "uninformed", "use_dfs"]
   },
   {
     "concept": "Algoritmul A*",
     "definition": "Cea mai cunoscută strategie de căutare informată. Evaluează nodurile prin f(n) = g(n) + h(n), unde g(n) este costul real și h(n) este costul estimat (euristica). Este complet și optimal dacă euristica h(n) este admisibilă.",
     "source": "IA_3_SBM_II.pdf",
-    "tags": ["search", "a-star", "informed"]
+    "tags": ["search", "a-star", "informed", "use_a_star"]
   },
   {
     "concept": "Hill Climbing",
     "definition": "O strategie de căutare locală de tip Greedy. Selectează întotdeauna cel mai bun vecin care îmbunătățește scorul euristic. Este foarte rapidă, dar se poate bloca în maxime locale.",
     "source": "IA_3_SBM_II.pdf",
-    "tags": ["search", "hill-climbing", "local-search"]
+    "tags": ["search", "hill-climbing", "local-search", "use_hill_climbing"]
   },
   {
     "concept": "Simulated Annealing",
     "definition": "O variație a Hill Climbing care permite alegerea unor stări mai 'proaste' cu o anumită probabilitate, pentru a scăpa din maxime locale. Probabilitatea scade pe măsură ce timpul trece (răcire).",
     "source": "IA_3_SBM_II.pdf",
-    "tags": ["search", "simulated-annealing", "local-search"]
+    "tags": ["search", "simulated-annealing", "local-search", "use_simulated_annealing"]
   },
   {
     "concept": "Uniform Cost Search (UCS)",
     "definition": "Strategie neinformată care explorează nodul cu cel mai mic cost al căii de la rădăcină (g(n)). Garantează soluția optimă dacă costurile sunt pozitive.",
     "source": "IA_2_SBM_I.pdf",
-    "tags": ["search", "ucs", "uninformed"]
+    "tags": ["search", "ucs", "uninformed", "use_ucs"]
   },
   {
     "concept": "Iterative Deepening Search (IDS)",
     "definition": "O strategie care combină beneficiile BFS (completitudine) și DFS (memorie redusă). Rulează DFS repetat cu o limită de adâncime crescătoare.",
     "source": "IA_2_SBM_I.pdf",
-    "tags": ["search", "ids", "uninformed"]
+    "tags": ["search", "ids", "uninformed", "use_ids"]
   },
   {
     "concept": "Bidirectional Search",
     "definition": "Strategie care rulează două căutări simultan: una de la starea inițială și una inversă de la starea finală. Se oprește când cele două se întâlnesc.",
     "source": "IA_2_SBM_I.pdf",
-    "tags": ["search", "bidirectional", "uninformed"]
+    "tags": ["search", "bidirectional", "uninformed", "use_bidirectional"]
   },
   {
     "concept": "Beam Search",
     "definition": "O variantă de BFS optimizat care păstrează doar cele mai bune k stări la fiecare nivel (bazat pe euristică), reducând memoria necesară, dar pierzând garanția optimalității.",
     "source": "IA_3_SBM_II.pdf",
-    "tags": ["search", "beam-search", "informed"]
+    "tags": ["search", "beam-search", "informed", "use_beam_search"]
   },
   {
     "concept": "Admisibilitatea Euristicii",
     "definition": "O euristică h(n) este admisibilă dacă nu supraestimează niciodată costul real până la țintă (h(n) <= h*(n)). Condiție necesară pentru ca A* să fie optim.",
     "source": "IA_3_SBM_II.pdf",
-    "tags": ["search", "heuristic", "theory"]
+    "tags": ["search", "heuristic", "theory", "use_admissibility"]
   },
   {
     "concept": "Consistența Euristicii",
     "definition": "O euristică este consistentă dacă h(n) <= cost(n, n') + h(n'). Asigură că prima cale găsită către o stare este cea optimă.",
     "source": "IA_3_SBM_II.pdf",
-    "tags": ["search", "heuristic", "theory"]
+    "tags": ["search", "heuristic", "theory", "use_consistency"]
+  },
+  {
+    "concept": "Strategie N-Queens (Instanțe Mari)",
+    "definition": "Pentru instanțe cu N mare (ex: N > 20), spațiul stărilor (N!) devine prea vast pentru algoritmi sistematici precum Backtracking. Abordarea optimă este Căutarea Locală (ex: Min-Conflicts), care sacrifică completitudinea pentru a găsi o soluție validă într-un timp extrem de scurt (adesea O(1) după pre-procesare), reparând iterativ conflictele.",
+    "source": "curs_CSP.pdf",
+    "tags": ["strategy", "n-queens", "reason_nqueens_large", "min-conflicts", "local-search", "use_nqueens_large", "strat-nqueens-dynamic"]
+  },
+  {
+    "concept": "Strategie N-Queens (Instanțe Mici)",
+    "definition": "Pentru instanțe mici (ex: N <= 15), algoritmul Backtracking (eventual optimizat cu Forward Checking) este preferat deoarece este complet: garantează găsirea unei soluții dacă aceasta există sau demonstrează inexistența ei, lucru imposibil pentru algoritmii de căutare locală.",
+    "source": "curs_CSP.pdf",
+    "tags": ["strategy", "n-queens", "reason_nqueens_small", "backtracking", "csp", "use_nqueens_small", "strat-nqueens-dynamic"]
+  },
+  {
+    "concept": "Strategie Hanoi (Optim)",
+    "definition": "Când obiectivul este găsirea numărului MINIM de mutări, algoritmul indicat este BFS (Breadth First Search). Deoarece BFS explorează spațiul stărilor nivel cu nivel, acesta garantează găsirea drumului cel mai scurt de la starea inițială la cea finală. DFS nu oferă această garanție și poate returna soluții mult mai lungi.",
+    "source": "IA_2_SBM_I.pdf",
+    "tags": ["strategy", "hanoi", "reason_hanoi_bfs", "bfs", "optimal", "use_hanoi_bfs", "strat-hanoi-dynamic"]
+  },
+  {
+    "concept": "Strategie Hanoi (Oarecare)",
+    "definition": "Dacă se cere doar identificarea unei soluții valide (fără restricție de optimalitate), DFS (sau implementarea sa recursivă Divide et Impera) este preferată datorită simplității și consumului redus de memorie (O(d) vs O(b^d) la BFS).",
+    "source": "IA_2_SBM_I.pdf",
+    "tags": ["strategy", "hanoi", "reason_hanoi_dfs", "dfs", "recursivitate", "use_hanoi_dfs", "strat-hanoi-dynamic"]
+  },
+  {
+    "concept": "Strategie Colorarea Hărților (Map Coloring)",
+    "definition": "Colorarea hărților este o problemă clasică CSP. Cea mai eficientă strategie standard este algoritmul de Backtracking augmentat cu euristica MRV (Minimum Remaining Values) pentru selecția variabilelor și Forward Checking (FC) pentru propagarea constrângerilor. Această combinație reduce drastic spațiul de căutare față de un Backtracking simplu.",
+    "source": "curs_CSP.pdf",
+    "tags": ["strategy", "graph-coloring", "reason_coloring_csp", "mrv", "fc", "csp", "use_coloring", "strat-coloring-dynamic"]
+  },
+  {
+    "concept": "Strategie Knight's Tour (Rapidă)",
+    "definition": "Pentru a găsi rapid un tur al calului pe table mari, Backtracking-ul este ineficient. Se recomandă euristica Greedy a lui Warnsdorff: 'Mută calul pe pătratul care are cei mai puțini vecini disponibili'. Această abordare reduce riscul de a intra în fundături și găsește soluții în timp liniar pentru majoritatea tablelor.",
+    "source": "IA_3_SBM_II.pdf",
+    "tags": ["strategy", "knights-tour", "reason_knight_warnsdorff", "greedy", "heuristic", "use_knights_tour_fast", "strat-knights-dynamic"]
+  },
+  {
+    "concept": "Strategie Knight's Tour (Completă)",
+    "definition": "Dacă scopul este demonstrarea inexistenței unui tur (ex: pe table mici sau atipice), este necesară o explorare exhaustivă folosind Backtracking. Euristicile Greedy nu pot demonstra inexistența soluției.",
+    "source": "IA_2_SBM_I.pdf",
+    "tags": ["strategy", "knights-tour", "reason_knight_backtracking", "backtracking", "use_knights_tour_complete", "strat-knights-dynamic"]
   }
 ]

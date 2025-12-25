@@ -8,6 +8,13 @@ from engine.generators.minmax_generator import MinMaxGenerator
 
 
 class QuestionService:
+    TYPE_TAGS = {
+        'nash': ['nash'],
+        'csp': ['csp'],
+        'minmax': ['minmax'],
+        'strategy': ['strategy']  # <--- Add this line
+    }
+
     def __init__(self, templates_path: str):
         self.templates_path = templates_path
         self.templates = {}
@@ -33,5 +40,20 @@ class QuestionService:
         if q_type == 'minmax':
             gen = MinMaxGenerator(self.templates_path)
             return gen.generate()
+
+        if q_type == 'strategy':
+            from engine.generators.strategy_generator import StrategyGenerator
+            # Filter templates with the 'strategy' tag
+            strategy_templates = [t for t in self.templates.values() if 'strategy' in t.get('tags', [])]
+            if not strategy_templates:
+                return {"error": "No templates available for strategy questions."}
+
+            # Randomly select one template
+            import random
+            selected_template = random.choice(strategy_templates)
+
+            # Generate the question using StrategyGenerator
+            gen = StrategyGenerator()
+            return gen.generate(selected_template)
 
         return {"error": f"Generator for type '{q_type}' not implemented."}

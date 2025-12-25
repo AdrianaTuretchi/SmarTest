@@ -16,6 +16,9 @@ from schemas import (
     MinMaxQuestionResponse,
     MinMaxSubmission,
     MinMaxEvaluationResponse,
+    StrategySubmission,
+    StrategyQuestionResponse,  # Add this import for Strategy questions
+    StrategyEvaluationResponse,
 )
 
 # FastAPI app
@@ -153,3 +156,31 @@ def evaluate_minmax(payload: MinMaxSubmission):
         raise HTTPException(status_code=500, detail=str(e))
 
     return MinMaxEvaluationResponse(score=score, correct_root_value=correct_root, correct_visited_count=correct_visited, feedback_text=feedback_text)
+
+@app.get("/question/strategy", response_model=StrategyQuestionResponse)
+def get_strategy_question():
+    """
+    Generates a new Strategy Selection question.
+    This uses the StrategyGenerator to create dynamic instances (e.g., N=100 vs N=5).
+    """
+    result = generator.generate_question_by_type("strategy")
+    if not result or "error" in result:
+        raise HTTPException(status_code=500, detail=result.get("error", "Failed to generate Strategy question"))
+
+    return StrategyQuestionResponse(
+        question_text=result.get("question_text", ""),
+        raw_data=result.get("raw_data"),
+        template_id=result.get("template_id"),
+    )
+
+@app.post("/evaluate/strategy", response_model=StrategyEvaluationResponse)
+def evaluate_strategy(payload: StrategySubmission):
+    """
+    Evaluates a strategy selection answer (e.g., choosing an algorithm).
+    """
+    try:
+        score, feedback_text = evaluator_service.evaluate('strategy', payload)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+    return StrategyEvaluationResponse(score=score, feedback_text=feedback_text)

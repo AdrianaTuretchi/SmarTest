@@ -17,7 +17,9 @@
     "tags": [
       "csp",
       "constraint-satisfaction",
-      "requires_calculation"
+      "requires_calculation",
+      "use_mrv",
+      "use_forward_checking"
     ],
     "source_file": "examen_22_06_22_spec.pdf"
   },
@@ -28,7 +30,8 @@
     "tags": [
       "csp",
       "constraint-satisfaction",
-      "requires_calculation"
+      "requires_calculation",
+      "use_backtracking"
     ],
     "source_file": "examen_30_01_22_A.pdf"
   },
@@ -51,7 +54,8 @@
     "tags": [
       "csp",
       "constraint-satisfaction",
-      "requires_calculation"
+      "requires_calculation",
+      "use_forward_checking"
     ],
     "source_file": "examen_30_01_22_B.pdf"
   },
@@ -73,7 +77,9 @@
     "tags": [
       "csp",
       "constraint-satisfaction",
-      "hybrid"
+      "hybrid",
+      "use_mrv",
+      "use_forward_checking"
     ],
     "source_file": "Examen_31_01_24_A.pdf"
   },
@@ -84,18 +90,20 @@
     "tags": [
       "csp",
       "constraint-satisfaction",
-      "requires_calculation"
+      "requires_calculation",
+      "use_backtracking"
     ],
     "source_file": "Examen_31_01_24_B.pdf"
   },
   {
     "id": "csp-9",
     "template": "Date fiind variabilele și restricțiile de mai jos, aplicați algoritmul Arc consistency pentru a actualiza valorile variabilelor. Specificați dacă problema este inconsistentă.",
-    "source_text_for_debug": "3. Graful de restrictii este reprezentat mai jos (valorile variabilelor sunt in noduri, iar restrictiile sunt reprezentate pe muchii). Aplicati algoritmul Arc consistency pentru a actualiza valorile variabilelor. Specificati daca problema este inconsistenta.",
+    "source_text_for_debug": "3. Graful de restrictii este reprezentat mai jos (valorile variabilelor sunt in noduri, iar restrictiile sunt reprezentate pe muchii). Aplicati algoritmul Arc consistency pentru a actualiza valorile variabilelor. Specificati daca problema este inconsistente.",
     "tags": [
       "csp",
       "constraint-satisfaction",
-      "requires_calculation"
+      "requires_calculation",
+      "use_ac3"
     ],
     "source_file": "Examen_31_01_24_B.pdf"
   },
@@ -110,5 +118,62 @@
       "requires_calculation"
     ],
     "source_file": "Examen_4_01_25_A_IP.pdf"
+  },
+  {
+    "id": "strat-nqueens-dynamic",
+    "template": "Pentru problema **N-Queens cu N={{n_value}}**, care este cea mai potrivită strategie de rezolvare dintre cele menționate la curs pentru a găsi o soluție validă într-un timp scurt?",
+    "tags": ["strategy", "n-queens", "csp", "local-search"],
+    "raw_data": {
+      "problem_type": "n-queens",
+      "generation_rules": {
+        "values": [4, 8, 10, 15, 100, 1000, 100000]
+      }
+    },
+    "template_id": "strat-nqueens-dynamic"
+  },
+  {
+    "id": "strat-hanoi-dynamic",
+    "template": "Pentru problema **Turnurile din Hanoi** cu {{num_disks}} discuri, unde obiectivul este {{goal_text}}, ce strategie de căutare este cea mai indicată?",
+    "tags": ["strategy", "hanoi", "search", "bfs", "dfs"],
+    "raw_data": {
+      "problem_type": "hanoi",
+      "generation_rules": {
+        "scenarios": [
+          {"num_disks": 3, "goal_text": "găsirea numărului MINIM de mutări", "goal_type": "optimal"},
+          {"num_disks": 5, "goal_text": "găsirea oricărei soluții valide (fără restricție de optim)", "goal_type": "any"}
+        ]
+      }
+    },
+    "template_id": "strat-hanoi-dynamic"
+  },
+  {
+    "id": "strat-coloring-dynamic",
+    "template": "Pentru problema **Colorarea Hărților (Graph Coloring)** aplicată pe un graf {{graph_size}} dens, cum este cel mai eficient să modelăm și să rezolvăm problema?",
+    "tags": ["strategy", "graph-coloring", "csp", "mrv", "forward-checking"],
+    "raw_data": {
+      "problem_type": "graph-coloring",
+      "generation_rules": {
+        "scenarios": [
+          {"graph_size": "mic (ex: 5 regiuni)", "context": "standard"},
+          {"graph_size": "complex (ex: 50 regiuni)", "context": "standard"}
+        ]
+      }
+    },
+    "template_id": "strat-coloring-dynamic"
+  },
+  {
+    "id": "strat-knights-dynamic",
+    "template": "Pentru problema **Tura Calului (Knight's Tour)** pe o tablă de {{board_size}}, unde se dorește {{goal_text}}, care este abordarea recomandată?",
+    "tags": ["strategy", "knights-tour", "heuristics"],
+    "raw_data": {
+      "problem_type": "knights-tour",
+      "generation_rules": {
+        "scenarios": [
+          {"board_size": "8x8", "goal_text": "găsirea rapidă a unei soluții", "goal_type": "fast"},
+          {"board_size": "4x4", "goal_text": "demonstrarea inexistenței unei soluții", "goal_type": "complete"}
+        ]
+      }
+    },
+    "template_id": "strat-knights-dynamic"
   }
 ]

@@ -162,10 +162,22 @@
     "tags": ["strategy", "hanoi", "reason_hanoi_dfs", "dfs", "recursivitate", "use_hanoi_dfs", "strat-hanoi-dynamic"]
   },
   {
-    "concept": "Strategie Colorarea Hărților (Map Coloring)",
-    "definition": "Colorarea hărților este o problemă clasică CSP. Cea mai eficientă strategie standard este algoritmul de Backtracking augmentat cu euristica MRV (Minimum Remaining Values) pentru selecția variabilelor și Forward Checking (FC) pentru propagarea constrângerilor. Această combinație reduce drastic spațiul de căutare față de un Backtracking simplu.",
+    "concept": "Strategie Colorarea Hărților - Graf Standard",
+    "definition": "Pentru grafuri generale cu cicluri și dimensiune mică/medie (5-50 noduri), cea mai eficientă strategie este Backtracking + Forward Checking (FC) + MRV. Este singura metodă care garantează găsirea soluției (completitudine) și poate demonstra inexistența ei dacă nu se poate colora. Optimizările FC și MRV reduc drastic spațiul de căutare.",
     "source": "curs_CSP.pdf",
-    "tags": ["strategy", "graph-coloring", "reason_coloring_csp", "mrv", "fc", "csp", "use_coloring", "strat-coloring-dynamic"]
+    "tags": ["strategy", "graph-coloring", "reason_coloring_standard", "mrv", "fc", "backtracking", "csp", "use_coloring_standard", "strat-coloring-standard"]
+  },
+  {
+    "concept": "Strategie Colorarea Hărților - Graf Arbore",
+    "definition": "Când graful constrângerilor este un arbore (fără cicluri), NU este nevoie de Backtracking. Algoritmul Tree-CSP (Sortare Topologică + Arc Consistency) rezolvă problema în timp liniar O(n). Backtracking-ul pe arbori este ineficient și un profesor strict va depuncta pentru alegerea lui.",
+    "source": "curs_CSP.pdf",
+    "tags": ["strategy", "graph-coloring", "reason_coloring_tree", "tree-csp", "arc-consistency", "topological-sort", "use_coloring_tree", "strat-coloring-tree"]
+  },
+  {
+    "concept": "Strategie Colorarea Hărților - Graf Gigant",
+    "definition": "Pentru grafuri foarte mari (mii de noduri) sau foarte dense, Backtracking-ul, chiar optimizat, devine impracticabil. Strategia optimă este Min-Conflicts (Căutare Locală): pornește de la o asignare aleatorie și repară iterativ conflictele. Nu garantează soluția, dar găsește soluții 'suficient de bune' extrem de rapid.",
+    "source": "curs_CSP.pdf",
+    "tags": ["strategy", "graph-coloring", "reason_coloring_giant", "min-conflicts", "local-search", "use_coloring_giant", "strat-coloring-giant"]
   },
   {
     "concept": "Strategie Knight's Tour (Rapidă)",

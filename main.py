@@ -1,5 +1,6 @@
 from pathlib import Path
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 
 from engine.question_service import QuestionService
 from engine.evaluation_service import EvaluationService
@@ -23,6 +24,15 @@ from schemas import (
 
 # FastAPI app
 app = FastAPI(title="SmarTest API")
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Project root and engine initialization
 PROJECT_ROOT = Path(__file__).resolve().parent
@@ -157,7 +167,7 @@ def evaluate_minmax(payload: MinMaxSubmission):
 
     return MinMaxEvaluationResponse(score=score, correct_root_value=correct_root, correct_visited_count=correct_visited, feedback_text=feedback_text)
 
-@app.get("/question/strategy", response_model=StrategyQuestionResponse)
+@app.get("/generate/strategy", response_model=StrategyQuestionResponse)
 def get_strategy_question():
     """
     Generates a new Strategy Selection question.
@@ -179,8 +189,8 @@ def evaluate_strategy(payload: StrategySubmission):
     Evaluates a strategy selection answer (e.g., choosing an algorithm).
     """
     try:
-        score, feedback_text = evaluator_service.evaluate('strategy', payload)
+        score, feedback_text, correct_answer = evaluator_service.evaluate('strategy', payload)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-    return StrategyEvaluationResponse(score=score, feedback_text=feedback_text)
+    return StrategyEvaluationResponse(score=score, feedback_text=feedback_text, correct_answer=correct_answer)

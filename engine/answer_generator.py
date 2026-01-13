@@ -195,7 +195,10 @@ class AnswerGenerator:
         tags: Optional[List[str]] = None
     ) -> str:
         """
-        Generate a complete answer combining math results and theory.
+        Generate a complete answer with theoretical justification only.
+        
+        The mathematical result (correct solution) is handled separately by the frontend,
+        so this method now returns only the theoretical justification.
         
         Args:
             q_type: Question type ('nash', 'csp', 'minmax')
@@ -203,29 +206,15 @@ class AnswerGenerator:
             tags: Optional list of tags for finding relevant theory
             
         Returns:
-            Formatted complete answer string
+            Formatted theoretical justification string
         """
-        # Initialize answer_parts with a default value
-        answer_parts = ["Răspuns Invalid:", "Nu s-a putut genera un răspuns complet."]
-
-        # Format mathematical result
-        formatted_result = self._format_math_result(q_type, math_result)
+        answer_parts = []
 
         # Ensure problem_type is included in tags
-        if q_type not in tags:
-            tags = tags + [q_type] if tags else [q_type]
-
-        # Determine the prefix based on the validity of the result
-        if "Strategia selectată nu este corectă." in formatted_result:
-            answer_parts = [
-                "Răspuns Gresit:",
-                formatted_result
-            ]
-        else:
-            answer_parts = [
-                "Răspuns Corect:",
-                formatted_result
-            ]
+        if tags is None:
+            tags = [q_type]
+        elif q_type not in tags:
+            tags = tags + [q_type]
         
         # Add theoretical justification if tags provided
         if tags:
@@ -233,10 +222,13 @@ class AnswerGenerator:
 
             if theory_text:
                 answer_parts.extend([
-                    "",  # Empty line
                     "Justificare Teoretică:",
                     theory_text
                 ])
+        
+        # If no theory found, return a default message
+        if not answer_parts:
+            return "Nu există justificare teoretică disponibilă."
         
         # Combine all parts
         full_answer = "\n".join(answer_parts)

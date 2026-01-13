@@ -37,7 +37,7 @@
   },
   {
     "id": "minmax-4",
-    "template": "Pentru arborele MinMax generat mai jos, aplicați algoritmul cu optimizarea Alpha-Beta și stabiliți valoarea rădăcinii.",
+    "template": "Pentru arborele MinMax generat mai jos, aplicați algoritmul cu optimizarea Alpha-Beta și determinați valoarea rădăcinii și numărul de noduri vizitate.",
     "source_text_for_debug": "5. (1p) Dati exemplu de arbore MINIMAX pe doua nivele (un MIN si un MAX) in care optimizarea AlphaBeta ar elimina exact un test suplimentar.",
     "tags": [
       "minmax",
@@ -147,19 +147,49 @@
     "template_id": "strat-hanoi-dynamic"
   },
   {
-    "id": "strat-coloring-dynamic",
-    "template": "Pentru problema **Colorarea Hărților (Graph Coloring)** aplicată pe un graf {{graph_size}} dens, cum este cel mai eficient să modelăm și să rezolvăm problema?",
+    "id": "strat-coloring-standard",
+    "template": "Pentru problema **Colorarea Hărților (Graph Coloring)** aplicată pe un graf cu {{num_nodes}} regiuni și multiple cicluri, care este cea mai eficientă strategie pentru a găsi o colorare validă sau a demonstra că nu există?",
     "tags": ["strategy", "graph-coloring", "csp", "mrv", "forward-checking"],
     "raw_data": {
       "problem_type": "graph-coloring",
+      "scenario_type": "standard",
       "generation_rules": {
-        "scenarios": [
-          {"graph_size": "mic (ex: 5 regiuni)", "context": "standard"},
-          {"graph_size": "complex (ex: 50 regiuni)", "context": "standard"}
-        ]
+        "num_nodes_range": [10, 30],
+        "is_tree": false,
+        "density": "medium"
       }
     },
-    "template_id": "strat-coloring-dynamic"
+    "template_id": "strat-coloring-standard"
+  },
+  {
+    "id": "strat-coloring-tree",
+    "template": "Pentru problema **Colorarea Hărților (Graph Coloring)** aplicată pe un graf **arbore** (fără cicluri) cu {{num_nodes}} noduri, care este cea mai eficientă strategie?",
+    "tags": ["strategy", "graph-coloring", "tree-csp", "arc-consistency"],
+    "raw_data": {
+      "problem_type": "graph-coloring",
+      "scenario_type": "tree",
+      "generation_rules": {
+        "num_nodes_range": [15, 50],
+        "is_tree": true,
+        "density": "sparse"
+      }
+    },
+    "template_id": "strat-coloring-tree"
+  },
+  {
+    "id": "strat-coloring-giant",
+    "template": "Pentru problema **Colorarea Hărților (Graph Coloring)** aplicată pe un graf **masiv** cu {{num_nodes}} noduri și densitate ridicată, unde timpul de execuție este critic, care este cea mai practică abordare?",
+    "tags": ["strategy", "graph-coloring", "local-search", "min-conflicts"],
+    "raw_data": {
+      "problem_type": "graph-coloring",
+      "scenario_type": "giant",
+      "generation_rules": {
+        "num_nodes_range": [5000, 10000],
+        "is_tree": false,
+        "density": "high"
+      }
+    },
+    "template_id": "strat-coloring-giant"
   },
   {
     "id": "strat-knights-dynamic",

@@ -46,8 +46,8 @@ class MinMaxQuestionResponse(BaseModel):
 
 
 class MinMaxSubmission(BaseModel):
-    root_value: int
-    visited_count: int
+    root_value: Optional[int] = None
+    visited_count: Optional[int] = None
     raw_data: Dict[str, Any]
 
 
@@ -70,4 +70,5 @@ class StrategyQuestionResponse(BaseModel):
 
 class StrategyEvaluationResponse(BaseModel):
     score: float
+    correct_answer: Optional[str] = None
     feedback_text: Optional[str] = None

@@ -32,7 +32,7 @@ class EvaluationService:
         
         self.answer_generator = AnswerGenerator(knowledge_base_path)
 
-    def evaluate(self, question_type: str, submission: Any) -> Tuple[float, str]:
+    def evaluate(self, question_type: str, submission: Any):
         """
         Dispatch evaluation based on question_type.
         
@@ -41,7 +41,7 @@ class EvaluationService:
             submission: Submission object with user_answer and raw_data
             
         Returns:
-            Tuple of (score, feedback_text)
+            Tuple of (score, feedback_text) or (score, feedback_text, correct_answer) for strategy
         """
         if question_type == 'nash':
             return self._evaluate_nash(submission)
@@ -151,12 +151,12 @@ class EvaluationService:
         
         return score, feedback
     
-    def _evaluate_strategy(self, submission: Any) -> Tuple[float, str]:
+    def _evaluate_strategy(self, submission: Any) -> Tuple[float, str, str]:
         """
         Evaluate Strategy submission.
 
         Returns:
-            Tuple of (score, feedback_text)
+            Tuple of (score, feedback_text, correct_answer)
         """
         # Use StrategySolver to determine the correct solution
         from core_logic.strategy_solver import StrategySolver
@@ -175,7 +175,7 @@ class EvaluationService:
         # Generate feedback
         feedback = self.answer_generator.generate_full_answer('strategy', score, tags)
 
-        return score, feedback
+        return score, feedback, computed_solution
 
     def evaluate_submission(self, question_type: str, submission: Any) -> Tuple[float, str]:
         """

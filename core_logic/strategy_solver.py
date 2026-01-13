@@ -29,9 +29,23 @@ class StrategySolver:
                 return "DFS (sau Recursivitate / Divide et Impera)", "reason_hanoi_dfs"
 
         # --- 3. Graph Coloring Logic ---
-        # Theory: CSP with Forward Checking and MRV is the standard optimized approach taught.
+        # Theory: Different strategies based on graph structure and size
         elif problem_type == 'graph-coloring':
-            return "CSP + Forward Checking + MRV", "reason_coloring_csp"
+            scenario_type = raw_data.get('scenario_type', 'standard')
+            is_tree = raw_data.get('is_tree', False)
+            num_nodes = raw_data.get('num_nodes', 20)
+            
+            # Tree structure -> Tree-CSP (linear time)
+            if is_tree or scenario_type == 'tree':
+                return "Tree-CSP (Arc Consistency + Sortare Topologică)", "reason_coloring_tree"
+            
+            # Giant graph -> Min-Conflicts (local search)
+            elif scenario_type == 'giant' or num_nodes > 1000:
+                return "Min-Conflicts (Căutare Locală)", "reason_coloring_giant"
+            
+            # Standard graph -> Backtracking + FC + MRV
+            else:
+                return "Backtracking (optimizat cu FC + MRV)", "reason_coloring_standard"
 
         # --- 4. Knight's Tour Logic ---
         # Theory: Warnsdorff's Rule (Heuristic) is for fast solutions. Backtracking is for completeness.

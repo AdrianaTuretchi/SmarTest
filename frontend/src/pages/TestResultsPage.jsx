@@ -84,6 +84,36 @@ const TestResultsPage = () => {
   const formatUserAnswer = (question, answer) => {
     if (!answer) return 'Necompletat';
 
+    if (question.type === 'nash') {
+      // Check if it's extended Nash (object with hasDominated, etc.)
+      if (typeof answer === 'object' && answer !== null) {
+        const parts = [];
+        
+        if (answer.hasDominated !== null && answer.hasDominated !== undefined) {
+          parts.push(`Strategii dominate: ${answer.hasDominated ? 'Da' : 'Nu'}`);
+          if (answer.hasDominated) {
+            if (answer.dominatedP1?.length > 0) {
+              parts.push(`P1: rândurile ${answer.dominatedP1.join(', ')}`);
+            }
+            if (answer.dominatedP2?.length > 0) {
+              parts.push(`P2: coloanele ${answer.dominatedP2.join(', ')}`);
+            }
+          }
+        }
+        
+        if (answer.hasEquilibrium !== null && answer.hasEquilibrium !== undefined) {
+          parts.push(`Echilibru Nash: ${answer.hasEquilibrium ? 'Da' : 'Nu'}`);
+          if (answer.hasEquilibrium && answer.equilibria) {
+            parts.push(`Coordonate: ${answer.equilibria}`);
+          }
+        }
+        
+        return parts.length > 0 ? parts.join('; ') : 'Necompletat';
+      }
+      // Simple string answer
+      return answer || 'Necompletat';
+    }
+
     if (question.type === 'csp') {
       if (Object.keys(answer).length === 0) return 'Necompletat';
       return Object.entries(answer)
@@ -103,9 +133,33 @@ const TestResultsPage = () => {
   // Format correct answer
   const formatCorrectAnswer = (question, result) => {
     if (question.type === 'nash') {
+      const parts = [];
+      
+      // Afișăm strategii dominate DOAR dacă întrebarea le cere
+      if (question.data.requires_dominated) {
+        const hasP1 = result.correct_dominated_p1?.length > 0;
+        const hasP2 = result.correct_dominated_p2?.length > 0;
+        
+        if (hasP1 || hasP2) {
+          let domText = 'Strategii dominate: ';
+          if (hasP1) domText += `P1: rândurile ${result.correct_dominated_p1.join(', ')}`;
+          if (hasP1 && hasP2) domText += '; ';
+          if (hasP2) domText += `P2: coloanele ${result.correct_dominated_p2.join(', ')}`;
+          parts.push(domText);
+        } else {
+          parts.push('Nu există strategii dominate');
+        }
+      }
+      
+      // Afișăm echilibrele Nash
       const coords = result.correct_coords;
-      if (!coords || coords.length === 0) return 'Nu există echilibre pure';
-      return coords.map((c) => `(${c[0]}, ${c[1]})`).join(', ');
+      if (!coords || coords.length === 0) {
+        parts.push('Nu există echilibre pure');
+      } else {
+        parts.push(`Echilibre Nash: ${coords.map((c) => `(${c[0]}, ${c[1]})`).join(', ')}`);
+      }
+      
+      return parts.join('; ');
     }
 
     if (question.type === 'csp') {
@@ -298,6 +352,12 @@ const TestResultsPage = () => {
                           </div>
                         ) : r.question.type === 'nash' && r.question.data.raw_data ? (
                           <div className="bg-brand-bg p-3 rounded-lg">
+                            <p className="text-sm text-brand-dark mb-3">
+                              {r.question.data.requires_dominated 
+                                ? "Pentru jocul de mai jos, identificați dacă există strategii strict dominate și echilibrele Nash pure."
+                                : "Pentru jocul de mai jos, identificați echilibrele Nash pure (dacă există)."
+                              }
+                            </p>
                             <NashMatrix matrixData={r.question.data.raw_data} />
                           </div>
                         ) : (

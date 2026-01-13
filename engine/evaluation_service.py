@@ -66,7 +66,15 @@ class EvaluationService:
         """
         # Calculate score
         evaluator = NashEvaluator()
-        score = evaluator.evaluate(submission.user_answer, submission.raw_data)
+        
+        # Handle None or dict user_answer
+        user_answer = submission.user_answer
+        if user_answer is None:
+            user_answer = ""
+        elif isinstance(user_answer, dict):
+            user_answer = user_answer.get('equilibria', '')
+        
+        score = evaluator.evaluate(user_answer, submission.raw_data)
         
         # Calculate ground truth for feedback
         correct_coords = find_pure_nash(submission.raw_data)

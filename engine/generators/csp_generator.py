@@ -18,10 +18,12 @@ class CSPGenerator:
             try:
                 with open(templates_path, 'r', encoding='utf-8') as f:
                     all_templates = json.load(f)
-                # Filter templates that have 'csp' in tags
+                # Filter templates that have 'csp' in tags BUT NOT 'strategy'
+                # This prevents strategy templates (like graph-coloring strategy questions) 
+                # from being used as CSP calculation questions
                 self.csp_templates = [
                     t for t in all_templates 
-                    if 'csp' in t.get('tags', [])
+                    if 'csp' in t.get('tags', []) and 'strategy' not in t.get('tags', [])
                 ]
             except (FileNotFoundError, json.JSONDecodeError) as e:
                 # Log warning but continue with empty list

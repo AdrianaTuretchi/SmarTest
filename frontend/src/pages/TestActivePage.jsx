@@ -65,6 +65,15 @@ const TestActivePage = () => {
           initialAnswers[q.id] = {};
         } else if (q.type === 'minmax') {
           initialAnswers[q.id] = { root_value: '', visited_count: '' };
+        } else if (q.type === 'nash' && q.data.requires_dominated) {
+          // Nash extended with dominated strategies
+          initialAnswers[q.id] = {
+            hasDominated: null,
+            dominatedP1: [],
+            dominatedP2: [],
+            hasEquilibrium: null,
+            equilibria: ''
+          };
         } else {
           initialAnswers[q.id] = '';
         }
@@ -148,6 +157,37 @@ const TestActivePage = () => {
     }));
   };
 
+  // Handle Nash extended answer changes
+  const handleNashExtendedChange = (field, value) => {
+    const questionId = questions[currentIndex].id;
+    setUserAnswers((prev) => ({
+      ...prev,
+      [questionId]: {
+        ...prev[questionId],
+        [field]: value,
+      },
+    }));
+  };
+
+  // Toggle dominated strategy selection
+  const toggleDominatedStrategy = (player, index) => {
+    const questionId = questions[currentIndex].id;
+    const key = player === 1 ? 'dominatedP1' : 'dominatedP2';
+    setUserAnswers((prev) => {
+      const current = prev[questionId]?.[key] || [];
+      const newArray = current.includes(index)
+        ? current.filter((i) => i !== index)
+        : [...current, index];
+      return {
+        ...prev,
+        [questionId]: {
+          ...prev[questionId],
+          [key]: newArray,
+        },
+      };
+    });
+  };
+
   // Navigation
   const goToNext = () => {
     if (currentIndex < questions.length - 1) {
@@ -179,6 +219,10 @@ const TestActivePage = () => {
     if (question.type === 'minmax') {
       return answer.root_value !== '' || answer.visited_count !== '';
     }
+    if (question.type === 'nash' && question.data.requires_dominated) {
+      // Extended Nash - check if has any answer
+      return answer.hasDominated !== null || answer.hasEquilibrium !== null;
+    }
     return answer !== '';
   };
 
@@ -196,10 +240,25 @@ const TestActivePage = () => {
       try {
         switch (question.type) {
           case 'nash':
-            payload = {
-              user_answer: answer || '',
-              raw_data: question.data.raw_data,
-            };
+            // Check if it's extended Nash with dominated strategies
+            if (question.data.requires_dominated) {
+              payload = {
+                user_answer: {
+                  has_dominated: answer?.hasDominated,
+                  dominated_p1: answer?.dominatedP1 || [],
+                  dominated_p2: answer?.dominatedP2 || [],
+                  has_equilibrium: answer?.hasEquilibrium,
+                  equilibria: answer?.equilibria || ''
+                },
+                raw_data: question.data.raw_data,
+                requires_dominated: true
+              };
+            } else {
+              payload = {
+                user_answer: answer || '',
+                raw_data: question.data.raw_data,
+              };
+            }
             break;
 
           case 'csp':
@@ -283,8 +342,10 @@ const TestActivePage = () => {
         ) : type === 'nash' && data.raw_data ? (
           <>
             <p className="text-brand-dark mb-4">
-              Pentru jocul reprezentat prin matricea de plăți de mai jos, identificați
-              echilibrul/echilibrele Nash pure (dacă există).
+              {data.requires_dominated 
+                ? "Pentru jocul reprezentat prin matricea de plăți de mai jos, identificați dacă există strategii strict dominate și echilibrul/echilibrele Nash pure."
+                : "Pentru jocul reprezentat prin matricea de plăți de mai jos, identificați echilibrul/echilibrele Nash pure (dacă există)."
+              }
             </p>
             <NashMatrix matrixData={data.raw_data} />
           </>
@@ -294,7 +355,7 @@ const TestActivePage = () => {
 
         {/* Answer Input */}
         <div className="mt-6">
-          {type === 'nash' && (
+          {type === 'nash' && !data.requires_dominated && (
             <div>
               <label className="block text-sm font-medium text-brand-dark mb-2">
                 Răspunsul tău (ex: "(0,1)" sau "(0,0), (1,1)"):
@@ -307,6 +368,146 @@ const TestActivePage = () => {
                 className="w-full border border-brand-neutral/30 rounded-lg px-4 py-3 text-brand-dark 
                            focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"
               />
+            </div>
+          )}
+
+          {type === 'nash' && data.requires_dominated && (
+            <div className="space-y-6">
+              {/* Secțiunea 1: Strategii Dominate */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h4 className="font-semibold text-blue-800 mb-3">1. Strategii Dominate</h4>
+                
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-brand-dark mb-2">
+                    Există strategii strict dominate?
+                  </label>
+                  <div className="flex gap-4">
+                    <button
+                      type="button"
+                      onClick={() => handleNashExtendedChange('hasDominated', true)}
+                      className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                        userAnswers[questionId]?.hasDominated === true
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                      }`}
+                    >
+                      Da
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleNashExtendedChange('hasDominated', false)}
+                      className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                        userAnswers[questionId]?.hasDominated === false
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                      }`}
+                    >
+                      Nu
+                    </button>
+                  </div>
+                </div>
+
+                {userAnswers[questionId]?.hasDominated === true && (
+                  <div className="space-y-3 border-t border-blue-200 pt-3">
+                    <p className="text-sm text-blue-700">Selectează strategiile dominate:</p>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-brand-dark mb-1">
+                        Jucător 1 (rânduri dominate):
+                      </label>
+                      <div className="flex gap-2 flex-wrap">
+                        {Array.from({ length: data.raw_data?.length || 0 }, (_, i) => (
+                          <button
+                            key={`p1-${i}`}
+                            type="button"
+                            onClick={() => toggleDominatedStrategy(1, i)}
+                            className={`px-3 py-1 rounded-full text-sm font-mono transition-colors ${
+                              userAnswers[questionId]?.dominatedP1?.includes(i)
+                                ? 'bg-red-500 text-white'
+                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                            }`}
+                          >
+                            S{i + 1} (rând {i})
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-brand-dark mb-1">
+                        Jucător 2 (coloane dominate):
+                      </label>
+                      <div className="flex gap-2 flex-wrap">
+                        {Array.from({ length: data.raw_data?.[0]?.length || 0 }, (_, i) => (
+                          <button
+                            key={`p2-${i}`}
+                            type="button"
+                            onClick={() => toggleDominatedStrategy(2, i)}
+                            className={`px-3 py-1 rounded-full text-sm font-mono transition-colors ${
+                              userAnswers[questionId]?.dominatedP2?.includes(i)
+                                ? 'bg-red-500 text-white'
+                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                            }`}
+                          >
+                            S{i + 1} (col {i})
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Secțiunea 2: Echilibru Nash */}
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <h4 className="font-semibold text-green-800 mb-3">2. Echilibru Nash Pur</h4>
+                
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-brand-dark mb-2">
+                    Există echilibru Nash pur?
+                  </label>
+                  <div className="flex gap-4">
+                    <button
+                      type="button"
+                      onClick={() => handleNashExtendedChange('hasEquilibrium', true)}
+                      className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                        userAnswers[questionId]?.hasEquilibrium === true
+                          ? 'bg-green-600 text-white'
+                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                      }`}
+                    >
+                      Da
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleNashExtendedChange('hasEquilibrium', false)}
+                      className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                        userAnswers[questionId]?.hasEquilibrium === false
+                          ? 'bg-green-600 text-white'
+                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                      }`}
+                    >
+                      Nu
+                    </button>
+                  </div>
+                </div>
+
+                {userAnswers[questionId]?.hasEquilibrium === true && (
+                  <div className="border-t border-green-200 pt-3">
+                    <label className="block text-sm font-medium text-brand-dark mb-2">
+                      Specifică echilibrele Nash (ex: "(0,1)" sau "(0,0), (1,1)"):
+                    </label>
+                    <input
+                      type="text"
+                      value={userAnswers[questionId]?.equilibria || ''}
+                      onChange={(e) => handleNashExtendedChange('equilibria', e.target.value)}
+                      placeholder="(rând, coloană)"
+                      className="w-full border border-brand-neutral/30 rounded-lg px-4 py-3 text-brand-dark 
+                                 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    />
+                  </div>
+                )}
+              </div>
             </div>
           )}
 

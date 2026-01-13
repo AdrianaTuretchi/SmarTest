@@ -55,6 +55,9 @@ class NashGenerator:
         # Check if data generation is needed
         needs_data = bool(template_tags & self.DATA_TRIGGER_TAGS)
         
+        # Check if template requires dominated strategies analysis
+        requires_dominated = 'dominated-strategies' in template_tags
+        
         if needs_data:
             # Generate and append data for calculation-based questions
             raw_matrix = self._generate_nash_data()
@@ -70,4 +73,5 @@ class NashGenerator:
             "question_text": final_question_text,
             "raw_data": raw_data,
             "template_id": template_id,
+            "requires_dominated": requires_dominated,
         }

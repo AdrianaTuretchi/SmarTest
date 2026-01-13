@@ -1,12 +1,12 @@
 [
   {
     "id": "nash-1",
-    "template": "Pentru jocul de mai jos (reprezentat prin matricea de plăți) există echilibru Nash pur? În caz contrar, sugerați modificări necesare pentru a exista.",
+    "template": "Pentru jocul de mai jos (reprezentat prin matricea de plăți), identificați toate echilibrele Nash pure (dacă există).",
     "source_text_for_debug": "5. (1p) Pentru jocul de mai jos exista echilibru Nash pur? In caz contrar, sugerati modificari necesare pentru a exista. John Mary Eat Sleep Eat 5 2 4 4 Sleep 4 3 2 4",
     "tags": [
       "nash",
       "game-theory",
-      "hybrid"
+      "requires_calculation"
     ],
     "source_file": "examen_13_02_22_X.pdf"
   },
@@ -66,9 +66,13 @@
     "tags": [
       "nash",
       "game-theory",
-      "requires_calculation"
+      "requires_calculation",
+      "dominated-strategies"
     ],
-    "source_file": "examen_30_01_22_B.pdf"
+    "source_file": "examen_30_01_22_B.pdf",
+    "raw_data": {
+      "requires_dominated": true
+    }
   },
   {
     "id": "csp-7",

@@ -13,7 +13,8 @@ class StrategySolver:
         # Theory: Backtracking is complete but slow (good for N<=20). 
         # Min-Conflicts is local search, incomplete but fast (needed for N>20).
         if problem_type == 'n-queens':
-            n = int(raw_data.get('n_value', 8))
+            # Support both 'n_value' (from generator) and 'n' (from parser)
+            n = int(raw_data.get('n_value') or raw_data.get('n', 8))
             if n <= 20:
                 return "Backtracking (sau CSP standard)", "reason_nqueens_small"
             else:
@@ -49,7 +50,7 @@ class StrategySolver:
 
         # --- 4. Knight's Tour Logic ---
         # Theory: Warnsdorff's Rule (Heuristic) is for fast solutions. Backtracking is for completeness.
-        elif problem_type == 'knights-tour':
+        elif problem_type in ['knights-tour', 'knight-tour']:
             goal = raw_data.get('goal_type', 'fast')
             if goal == 'fast':
                 return "Regula lui Warnsdorff (Euristică Greedy)", "reason_knight_warnsdorff"

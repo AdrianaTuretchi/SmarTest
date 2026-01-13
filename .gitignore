@@ -30,5 +30,3 @@ temp/
 .pytest_cache/
 htmlcov/
 .coverage
-
-*.md

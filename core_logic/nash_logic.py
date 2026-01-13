@@ -1,8 +1,78 @@
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 
 # Definim tipurile de date pentru claritate
 Matrix = List[List[Tuple[int, int]]]
 Coordinates = List[Tuple[int, int]]
+
+
+def find_dominated_strategies(payoff_matrix: Matrix) -> Dict[str, List[int]]:
+    """
+    Găsește toate strategiile strict dominate pentru fiecare jucător.
+    
+    O strategie este STRICT DOMINATĂ dacă există o altă strategie care dă
+    un payoff STRICT mai mare pentru TOATE strategiile posibile ale oponentului.
+    
+    Args:
+        payoff_matrix: Matricea de plăți (lista de liste de tuple [p1, p2])
+    
+    Returns:
+        Dict cu cheile 'player1' și 'player2', fiecare conținând lista de 
+        indici ai strategiilor dominate (0-indexed)
+        
+    Exemplu:
+        Pentru matricea unde rândul 0 este dominat de rândul 1:
+        {'player1': [0], 'player2': []}
+    """
+    if not payoff_matrix or not payoff_matrix[0]:
+        return {'player1': [], 'player2': []}
+    
+    num_rows = len(payoff_matrix)
+    num_cols = len(payoff_matrix[0])
+    
+    dominated_p1 = []  # Strategii dominate pentru jucătorul 1 (rânduri)
+    dominated_p2 = []  # Strategii dominate pentru jucătorul 2 (coloane)
+    
+    # Verificăm strategiile jucătorului 1 (rânduri)
+    # Strategia i este dominată de strategia j dacă:
+    # payoff_p1[j][c] > payoff_p1[i][c] pentru TOATE coloanele c
+    for i in range(num_rows):
+        for j in range(num_rows):
+            if i == j:
+                continue
+            # Verificăm dacă rândul j domină strict rândul i
+            is_dominated = True
+            for c in range(num_cols):
+                if payoff_matrix[j][c][0] <= payoff_matrix[i][c][0]:
+                    is_dominated = False
+                    break
+            if is_dominated:
+                if i not in dominated_p1:
+                    dominated_p1.append(i)
+                break  # Am găsit că i este dominat, nu mai căutăm
+    
+    # Verificăm strategiile jucătorului 2 (coloane)
+    # Strategia i este dominată de strategia j dacă:
+    # payoff_p2[r][j] > payoff_p2[r][i] pentru TOATE rândurile r
+    for i in range(num_cols):
+        for j in range(num_cols):
+            if i == j:
+                continue
+            # Verificăm dacă coloana j domină strict coloana i
+            is_dominated = True
+            for r in range(num_rows):
+                if payoff_matrix[r][j][1] <= payoff_matrix[r][i][1]:
+                    is_dominated = False
+                    break
+            if is_dominated:
+                if i not in dominated_p2:
+                    dominated_p2.append(i)
+                break  # Am găsit că i este dominat, nu mai căutăm
+    
+    return {
+        'player1': sorted(dominated_p1),
+        'player2': sorted(dominated_p2)
+    }
+
 
 def find_pure_nash(payoff_matrix: Matrix) -> Coordinates:
     """

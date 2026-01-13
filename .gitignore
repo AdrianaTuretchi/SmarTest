@@ -6,6 +6,10 @@ venv/
 __pycache__/
 *.pyc
 
+# Node.js (în caz că e rulat npm install accidental în rădăcină)
+node_modules/
+package-lock.json
+
 # Fișiere OS
 .DS_Store
 Thumbs.db
@@ -26,3 +30,5 @@ temp/
 .pytest_cache/
 htmlcov/
 .coverage
+
+*.md

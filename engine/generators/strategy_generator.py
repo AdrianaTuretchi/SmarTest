@@ -29,8 +29,27 @@ class StrategyGenerator:
             generated_params = {'n_value': n_val}
             result['template'] = result['template'].replace('{{n_value}}', str(n_val))
 
-        # Logic for Scenarios (Hanoi, Knights Tour, Coloring)
-        elif problem_type in ['hanoi', 'knights-tour', 'graph-coloring']:
+        # Logic for Graph Coloring with multiple scenario types
+        elif problem_type == 'graph-coloring':
+            scenario_type = raw_data.get('scenario_type', 'standard')
+            num_nodes_range = rules.get('num_nodes_range', [10, 30])
+            is_tree = rules.get('is_tree', False)
+            density = rules.get('density', 'medium')
+            
+            # Generate random number of nodes within range
+            num_nodes = random.randint(num_nodes_range[0], num_nodes_range[1])
+            
+            generated_params = {
+                'num_nodes': num_nodes,
+                'scenario_type': scenario_type,
+                'is_tree': is_tree,
+                'density': density
+            }
+            
+            result['template'] = result['template'].replace('{{num_nodes}}', str(num_nodes))
+
+        # Logic for Scenarios (Hanoi, Knights Tour)
+        elif problem_type in ['hanoi', 'knights-tour']:
             scenarios = rules.get('scenarios', [])
             if scenarios:
                 scenario = random.choice(scenarios)

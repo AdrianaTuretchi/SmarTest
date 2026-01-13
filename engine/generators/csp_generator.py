@@ -103,33 +103,25 @@ class CSPGenerator:
             template_text = selected_template['template']
             final_template_id = selected_template['id']
             template_tags = set(selected_template.get('tags', []))
-            # If template not found, assume it requires calculation (safe default)
-            needs_data = True
         else:
             template_text = self.DEFAULT_TEMPLATE
             final_template_id = 'csp-default'
-            # Fallback always requires calculation
-            needs_data = True
+            template_tags = set()
         
-        # Check if data generation is needed (only if we have a real template)
-        if selected_template:
-            needs_data = bool(template_tags & self.DATA_TRIGGER_TAGS)
+        # CSP questions always need raw_data for evaluation
+        # Generate CSP data for all questions
+        data = self._generate_csp_data()
+        variables, domains, constraints, partial_assignment = data
+        question_text = template_text + "\n\n" + self._format_csp_data_string(data)
         
-        if needs_data:
-            # Generate and append data for calculation-based questions
-            data = self._generate_csp_data()
-            variables, domains, constraints, partial_assignment = data
-            question_text = template_text + "\n\n" + self._format_csp_data_string(data)
-            raw_data = {
-                'variables': variables,
-                'domains': domains,
-                'constraints': constraints,
-                'partial_assignment': partial_assignment,
-            }
-        else:
-            # Pure theory question - no data generation
-            question_text = template_text
-            raw_data = None
+        # Include template tags in raw_data for evaluation logic
+        raw_data = {
+            'variables': variables,
+            'domains': domains,
+            'constraints': constraints,
+            'partial_assignment': partial_assignment,
+            'tags': list(template_tags),
+        }
         
         return {
             'question_text': question_text,

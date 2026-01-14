@@ -115,9 +115,22 @@ const TestResultsPage = () => {
     }
 
     if (question.type === 'csp') {
+      // Verificăm dacă utilizatorul a răspuns că nu are soluție
+      if (answer.hasSolution === false) {
+        return 'Nu are soluție!';
+      }
+      if (answer.hasSolution === true) {
+        const assignments = answer.assignments || {};
+        if (Object.keys(assignments).length === 0) return 'Are soluție (necompletat)';
+        return Object.entries(assignments)
+          .filter(([_, v]) => v !== '' && v !== undefined)
+          .map(([k, v]) => `${k}=${v}`)
+          .join(', ') || 'Are soluție (necompletat)';
+      }
+      // Fallback pentru formatul vechi (fără hasSolution)
       if (Object.keys(answer).length === 0) return 'Necompletat';
       return Object.entries(answer)
-        .filter(([_, v]) => v !== '' && v !== undefined)
+        .filter(([k, v]) => k !== 'hasSolution' && k !== 'assignments' && v !== '' && v !== undefined)
         .map(([k, v]) => `${k}=${v}`)
         .join(', ') || 'Necompletat';
     }
@@ -163,8 +176,12 @@ const TestResultsPage = () => {
     }
 
     if (question.type === 'csp') {
+      // Verificăm dacă problema are soluție
+      if (result.has_solution === false) {
+        return 'Nu are soluție (inconsistent)';
+      }
       const assignment = result.correct_assignment;
-      if (!assignment || Object.keys(assignment).length === 0) return 'Inconsistent';
+      if (!assignment || Object.keys(assignment).length === 0) return 'Nu are soluție';
       return Object.entries(assignment)
         .map(([k, v]) => `${k}=${v}`)
         .join(', ');

@@ -21,7 +21,7 @@ const PracticePage = () => {
       hasEquilibrium: null, // true/false/null
       equilibriumCoords: '' // string like "(0,1)"
     },
-    csp: {},
+    csp: { assignments: {}, hasSolution: null },  // hasSolution: true/false/null
     minmax: { root_value: '', visited_count: '' },
   });
   const [evaluationResults, setEvaluationResults] = useState({
@@ -49,7 +49,7 @@ const PracticePage = () => {
     }));
     setUserAnswers((prev) => ({
       ...prev,
-      [type]: type === 'csp' ? {} : type === 'minmax' ? { root_value: '', visited_count: '' } : '',
+      [type]: type === 'csp' ? { assignments: {}, hasSolution: null } : type === 'minmax' ? { root_value: '', visited_count: '' } : '',
       ...(type === 'nash' ? {
         nashExtended: {
           hasDominated: null,
@@ -80,12 +80,22 @@ const PracticePage = () => {
   const handleCspAnswerChange = (variable, value) => {
     setUserAnswers((prev) => ({
       ...prev,
-      csp: { ...prev.csp, [variable]: value === '' ? '' : parseInt(value, 10) },
+      csp: { 
+        ...prev.csp, 
+        assignments: { ...prev.csp.assignments, [variable]: value === '' ? '' : parseInt(value, 10) }
+      },
     }));
     // Clear validation error for this variable when user types
     setValidationErrors((prev) => ({
       ...prev,
       csp: { ...prev.csp, [variable]: null },
+    }));
+  };
+
+  const handleCspHasSolutionChange = (value) => {
+    setUserAnswers((prev) => ({
+      ...prev,
+      csp: { ...prev.csp, hasSolution: value },
     }));
   };
 
@@ -156,19 +166,26 @@ const PracticePage = () => {
         break;
 
       case 'csp':
-        const variables = question.raw_data?.variables || [];
-        const partialAssignment = question.raw_data?.partial_assignment || {};
-        const cspErrors = {};
-        variables.forEach((v) => {
-          if (partialAssignment[v] !== undefined) return;
-          const val = userAnswers.csp[v];
-          if (val === undefined || val === '' || isNaN(val)) {
-            cspErrors[v] = 'Completează';
-            hasErrors = true;
+        // Trebuie să aleagă dacă problema are soluție sau nu
+        if (userAnswers.csp.hasSolution === null) {
+          setValidationErrors((prev) => ({ ...prev, csp: { hasSolution: 'Selectează dacă problema are soluție' } }));
+          hasErrors = true;
+        } else if (userAnswers.csp.hasSolution === true) {
+          // Dacă are soluție, trebuie completate toate variabilele
+          const variables = question.raw_data?.variables || [];
+          const partialAssignment = question.raw_data?.partial_assignment || {};
+          const cspErrors = {};
+          variables.forEach((v) => {
+            if (partialAssignment[v] !== undefined) return;
+            const val = userAnswers.csp.assignments?.[v];
+            if (val === undefined || val === '' || isNaN(val)) {
+              cspErrors[v] = 'Completează';
+              hasErrors = true;
+            }
+          });
+          if (hasErrors) {
+            setValidationErrors((prev) => ({ ...prev, csp: cspErrors }));
           }
-        });
-        if (hasErrors) {
-          setValidationErrors((prev) => ({ ...prev, csp: cspErrors }));
         }
         break;
 
@@ -239,18 +256,27 @@ const PracticePage = () => {
           break;
 
         case 'csp':
-          // Filter out empty values and ensure integers
-          const cleanedCspAnswer = {};
-          Object.entries(userAnswers.csp).forEach(([key, val]) => {
-            if (val !== '' && val !== undefined) {
-              cleanedCspAnswer[key] = parseInt(val, 10);
-            }
-          });
-          payload = {
-            user_answer: cleanedCspAnswer,
+          // Construim payload-ul pentru CSP
+          const cspPayload = {
             raw_data: question.raw_data,
             template_id: question.template_id,
+            has_solution: userAnswers.csp.hasSolution,
           };
+          
+          // Dacă utilizatorul crede că are soluție, includem și asignările
+          if (userAnswers.csp.hasSolution === true) {
+            const cleanedCspAnswer = {};
+            Object.entries(userAnswers.csp.assignments || {}).forEach(([key, val]) => {
+              if (val !== '' && val !== undefined) {
+                cleanedCspAnswer[key] = parseInt(val, 10);
+              }
+            });
+            cspPayload.user_answer = cleanedCspAnswer;
+          } else {
+            cspPayload.user_answer = {};
+          }
+          
+          payload = cspPayload;
           break;
 
         case 'minmax':
@@ -467,36 +493,70 @@ const PracticePage = () => {
         const variables = question.raw_data?.variables || [];
         const partialAssignment = question.raw_data?.partial_assignment || {};
         return (
-          <div className="mt-4">
-            <label className="block text-sm font-medium text-brand-dark mb-2">
-              Asignează valori pentru fiecare variabilă:
-            </label>
-            <div className="grid grid-cols-2 gap-2">
-              {variables.map((variable) => {
-                const isPartial = partialAssignment[variable] !== undefined;
-                const hasError = validationErrors.csp?.[variable];
-                return (
-                  <div key={variable} className="flex flex-col">
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono text-brand-dark">{variable}:</span>
-                      <input
-                        type="number"
-                        value={isPartial ? partialAssignment[variable] : (userAnswers.csp[variable] ?? '')}
-                        onChange={(e) => handleCspAnswerChange(variable, e.target.value)}
-                        placeholder="valoare"
-                        disabled={isPartial}
-                        className={`flex-1 border rounded px-2 py-1 text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-primary ${
-                          hasError ? 'border-red-500' : 'border-brand-neutral/30'
-                        } ${isPartial ? 'bg-gray-100 cursor-not-allowed' : ''}`}
-                      />
-                    </div>
-                    {hasError && (
-                      <p className="text-red-500 text-xs mt-0.5 ml-8">{hasError}</p>
-                    )}
-                  </div>
-                );
-              })}
+          <div className="mt-4 space-y-4">
+            {/* Checkbox pentru "Are soluție?" */}
+            <div className="p-3 bg-gray-50 rounded border border-brand-neutral/20">
+              <label className="block text-sm font-medium text-brand-dark mb-2">
+                Problema are soluție?
+              </label>
+              <div className="flex gap-4">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="csp-has-solution"
+                    checked={userAnswers.csp.hasSolution === true}
+                    onChange={() => handleCspHasSolutionChange(true)}
+                    className="w-4 h-4 text-brand-primary"
+                  />
+                  <span className="text-brand-dark">Da, are soluție</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="csp-has-solution"
+                    checked={userAnswers.csp.hasSolution === false}
+                    onChange={() => handleCspHasSolutionChange(false)}
+                    className="w-4 h-4 text-brand-primary"
+                  />
+                  <span className="text-brand-dark">Nu, nu are soluție</span>
+                </label>
+              </div>
             </div>
+
+            {/* Câmpurile pentru variabile - afișate doar dacă utilizatorul crede că are soluție */}
+            {userAnswers.csp.hasSolution === true && (
+              <div>
+                <label className="block text-sm font-medium text-brand-dark mb-2">
+                  Asignează valori pentru fiecare variabilă:
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  {variables.map((variable) => {
+                    const isPartial = partialAssignment[variable] !== undefined;
+                    const hasError = validationErrors.csp?.[variable];
+                    return (
+                      <div key={variable} className="flex flex-col">
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-brand-dark">{variable}:</span>
+                          <input
+                            type="number"
+                            value={isPartial ? partialAssignment[variable] : (userAnswers.csp.assignments[variable] ?? '')}
+                            onChange={(e) => handleCspAnswerChange(variable, e.target.value)}
+                            placeholder="valoare"
+                            disabled={isPartial}
+                            className={`flex-1 border rounded px-2 py-1 text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-primary ${
+                              hasError ? 'border-red-500' : 'border-brand-neutral/30'
+                            } ${isPartial ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                          />
+                        </div>
+                        {hasError && (
+                          <p className="text-red-500 text-xs mt-0.5 ml-8">{hasError}</p>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         );
 

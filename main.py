@@ -193,8 +193,9 @@ def evaluate_csp(payload: CSPSubmission):
     """Evaluate a CSP submission: user_answer is a dict mapping variable->value."""
     user_answer = payload.user_answer
     raw_data = payload.raw_data
+    has_solution = payload.has_solution
 
-    # Recompute correct solution using csp_backtrack (from core_logic.csp_logic)
+    # Validate raw_data
     try:
         variables = raw_data['variables']
         domains = raw_data['domains']
@@ -203,15 +204,25 @@ def evaluate_csp(payload: CSPSubmission):
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Invalid raw_data structure: {e}")
 
-    correct = csp_backtrack(variables, domains, constraints, partial_assignment)
-
-    # evaluate via EvaluationService
+    # Evaluate using CSPEvaluator
+    from engine.evaluators.csp_evaluator import CSPEvaluator
+    evaluator = CSPEvaluator()
+    
     try:
-        score, feedback_text = evaluator_service.evaluate('csp', payload)
+        score, correct_solution, problem_has_solution, feedback_text = evaluator.evaluate(
+            user_answer, 
+            raw_data, 
+            has_solution
+        )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-    return CSPEvaluationResponse(score=score, correct_assignment=correct or {}, feedback_text=feedback_text)
+    return CSPEvaluationResponse(
+        score=score, 
+        correct_assignment=correct_solution, 
+        has_solution=problem_has_solution,
+        feedback_text=feedback_text
+    )
 
 
 @app.get("/generate/minmax", response_model=MinMaxQuestionResponse)
@@ -361,26 +372,104 @@ def solve_question(request: SolveRequest):
                     if len(c) == 2:
                         constraint_list.append((c[0], c[1]))  # Tuple simplu, != este implicit în solver
                 
-                # Încercăm backtracking cu asignarea parțială
-                try:
-                    result = csp_backtrack(variables, domains, constraint_list, partial_assignment.copy(), use_mrv=True, use_fc=True)
-                    if result:
-                        solution = {
-                            'assignment': result,
-                            'method': 'Backtracking cu MRV și Forward Checking'
-                        }
-                        # Formatăm cu culori pentru graph coloring
-                        color_names = {1: 'Roșu', 2: 'Verde', 3: 'Albastru', 4: 'Galben'}
-                        if 'graph-coloring' in data.get('tags', []):
-                            assignment_str = ', '.join([f'{k}={color_names.get(v, v)}' for k, v in sorted(result.items())])
+                # Extragem flag-urile pentru algoritmi din datele parsate
+                use_mrv = data.get('use_mrv', False)
+                use_fc = data.get('use_fc', False)
+                use_ac3 = data.get('use_ac3', False)
+                use_backtracking = data.get('use_backtracking', False)
+                
+                # Dacă se cere doar AC-3 (fără backtracking explicit), folosim AC-3
+                # Altfel, folosim backtracking (care e default-ul pentru CSP)
+                if use_ac3 and not use_backtracking and not use_mrv and not use_fc:
+                    # Folosim doar AC-3
+                    try:
+                        # AC-3 doar reduce domeniile, nu găsește soluția completă
+                        domains_copy = {k: list(v) for k, v in domains.items()}
+                        
+                        # Aplicăm asignarea parțială - setăm domeniul variabilelor asignate la valoarea lor
+                        for var, val in partial_assignment.items():
+                            if var in domains_copy:
+                                domains_copy[var] = [val]
+                        
+                        reduced_domains = ac3(variables, domains_copy, constraint_list)
+                        
+                        if reduced_domains is not None:
+                            # AC-3 a redus domeniile, verificăm dacă avem soluție directă
+                            # (toate domeniile cu o singură valoare)
+                            if all(len(d) == 1 for d in reduced_domains.values()):
+                                result = {v: reduced_domains[v][0] for v in variables}
+                                solution = {
+                                    'assignment': result,
+                                    'method': 'Arc Consistency (AC-3)',
+                                    'reduced_domains': reduced_domains
+                                }
+                                assignment_str = ', '.join([f'{k}={v}' for k, v in sorted(result.items())])
+                                justification = f"Soluție găsită prin AC-3: {assignment_str}. Algoritmul Arc Consistency a redus domeniile până la soluția unică."
+                            else:
+                                # Problema e consistentă dar AC-3 nu a găsit soluție completă
+                                # Folosim backtracking pentru a găsi soluția
+                                result = csp_backtrack(variables, reduced_domains, constraint_list, partial_assignment.copy(), use_mrv=False, use_fc=False)
+                                if result:
+                                    solution = {
+                                        'assignment': result,
+                                        'method': 'Arc Consistency (AC-3) + Backtracking',
+                                        'reduced_domains': reduced_domains
+                                    }
+                                    assignment_str = ', '.join([f'{k}={v}' for k, v in sorted(result.items())])
+                                    domains_str = ', '.join([f'{k}: {v}' for k, v in sorted(reduced_domains.items())])
+                                    justification = f"Soluție găsită: {assignment_str}. AC-3 a redus domeniile la: {domains_str}, apoi backtracking a completat soluția."
+                                else:
+                                    solution = {
+                                        'consistent': True,
+                                        'reduced_domains': reduced_domains,
+                                        'method': 'Arc Consistency (AC-3)'
+                                    }
+                                    domains_str = ', '.join([f'{k}: {v}' for k, v in sorted(reduced_domains.items())])
+                                    justification = f"Problema este consistentă după AC-3. Domeniile reduse: {domains_str}."
                         else:
-                            assignment_str = ', '.join([f'{k}={v}' for k, v in sorted(result.items())])
-                        justification = f"Soluție găsită: {assignment_str}. Am folosit Backtracking cu euristica MRV (Minimum Remaining Values) și Forward Checking pentru eficiență."
-                    else:
-                        solution = {'assignment': None, 'consistent': False}
-                        justification = "Problema CSP nu are soluție - constrângerile sunt inconsistente."
-                except Exception as e:
-                    error_message = f"Eroare la rezolvarea CSP: {str(e)}"
+                            solution = {'consistent': False, 'method': 'Arc Consistency (AC-3)'}
+                            justification = "Problema CSP este inconsistentă - AC-3 a detectat că nu există soluție."
+                    except Exception as e:
+                        error_message = f"Eroare la rularea AC-3: {str(e)}"
+                else:
+                    # Folosim backtracking (default pentru orice problemă CSP)
+                    try:
+                        result = csp_backtrack(variables, domains, constraint_list, partial_assignment.copy(), use_mrv=use_mrv, use_fc=use_fc)
+                        if result:
+                            # Construim descrierea metodei pe baza algoritmilor folosiți
+                            method_parts = ['Backtracking']
+                            if use_mrv:
+                                method_parts.append('MRV')
+                            if use_fc:
+                                method_parts.append('Forward Checking')
+                            method_desc = ' cu '.join([method_parts[0], ' și '.join(method_parts[1:])]) if len(method_parts) > 1 else method_parts[0]
+                            
+                            solution = {
+                                'assignment': result,
+                                'method': method_desc
+                            }
+                            # Formatăm cu culori pentru graph coloring
+                            color_names = {1: 'Roșu', 2: 'Verde', 3: 'Albastru', 4: 'Galben'}
+                            if 'graph-coloring' in data.get('tags', []):
+                                assignment_str = ', '.join([f'{k}={color_names.get(v, v)}' for k, v in sorted(result.items())])
+                            else:
+                                assignment_str = ', '.join([f'{k}={v}' for k, v in sorted(result.items())])
+                            # Construim justificarea pe baza algoritmilor folosiți
+                            algo_desc = []
+                            if use_mrv:
+                                algo_desc.append('euristica MRV (Minimum Remaining Values)')
+                            if use_fc:
+                                algo_desc.append('Forward Checking')
+                            
+                            if algo_desc:
+                                justification = f"Soluție găsită: {assignment_str}. Am folosit Backtracking cu {' și '.join(algo_desc)} pentru eficiență."
+                            else:
+                                justification = f"Soluție găsită: {assignment_str}. Am folosit algoritmul Backtracking simplu."
+                        else:
+                            solution = {'assignment': None, 'consistent': False}
+                            justification = "Problema CSP nu are soluție - constrângerile sunt inconsistente."
+                    except Exception as e:
+                        error_message = f"Eroare la rezolvarea CSP: {str(e)}"
             else:
                 error_message = "Nu am putut extrage variabilele și domeniile din text."
         

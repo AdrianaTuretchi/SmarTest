@@ -41,11 +41,13 @@ class CSPSubmission(BaseModel):
     user_answer: Dict[str, int] 
     raw_data: Dict[str, Any]
     template_id: Optional[str] = None
+    has_solution: Optional[bool] = None  # True/False/None - dacă utilizatorul crede că problema are soluție
 
 
 class CSPEvaluationResponse(BaseModel):
     score: float
-    correct_assignment: Dict[str, int]
+    correct_assignment: Optional[Dict[str, int]] = None
+    has_solution: Optional[bool] = None  # True dacă problema are soluție, False altfel
     feedback_text: Optional[str] = None
 
 

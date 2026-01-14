@@ -364,25 +364,39 @@ class QuestionParser:
             if domains:
                 data['domains'] = domains
         else:
-            # Pattern vechi: domeniu {1, 2, 3} sau 3 culori
-            domain_pattern = r'(\d+)\s*culor|domeniu\s*[:\{]?\s*[\{\[]?([^\}\]]+)[\}\]]?'
-            domain_match = re.search(domain_pattern, text_lower)
+            # Format: A ∈ {1, 2}, B ∈ {1, 2, 3} sau A in {1, 2}
+            individual_domain_pattern = r'([A-Z])\s*(?:∈|in|∊)\s*\{([^}]+)\}'
+            individual_matches = re.findall(individual_domain_pattern, text, re.IGNORECASE)
             
-            if domain_match:
-                if domain_match.group(1):  # N culori
-                    n_colors = int(domain_match.group(1))
-                    data['domain_size'] = n_colors
-                    data['domains'] = {v: list(range(1, n_colors + 1)) for v in variables}
-                elif domain_match.group(2):
-                    domain_values = re.findall(r'\d+', domain_match.group(2))
-                    if domain_values:
-                        domain = [int(d) for d in domain_values]
-                        data['domains'] = {v: domain for v in variables}
+            if individual_matches:
+                domains = {}
+                for var, vals in individual_matches:
+                    var = var.upper()
+                    values = [int(v.strip()) for v in re.findall(r'\d+', vals)]
+                    if values:
+                        domains[var] = values
+                if domains:
+                    data['domains'] = domains
             else:
-                # Default: 3 culori dacă e problemă de colorare
-                if 'color' in text_lower or 'culor' in text_lower:
-                    data['domain_size'] = 3
-                    data['domains'] = {v: [1, 2, 3] for v in variables}
+                # Pattern vechi: domeniu {1, 2, 3} sau 3 culori
+                domain_pattern = r'(\d+)\s*culor|domeniu\s*[:\{]?\s*[\{\[]?([^\}\]]+)[\}\]]?'
+                domain_match = re.search(domain_pattern, text_lower)
+                
+                if domain_match:
+                    if domain_match.group(1):  # N culori
+                        n_colors = int(domain_match.group(1))
+                        data['domain_size'] = n_colors
+                        data['domains'] = {v: list(range(1, n_colors + 1)) for v in variables}
+                    elif domain_match.group(2):
+                        domain_values = re.findall(r'\d+', domain_match.group(2))
+                        if domain_values:
+                            domain = [int(d) for d in domain_values]
+                            data['domains'] = {v: domain for v in variables}
+                else:
+                    # Default: 3 culori dacă e problemă de colorare
+                    if 'color' in text_lower or 'culor' in text_lower:
+                        data['domain_size'] = 3
+                        data['domains'] = {v: [1, 2, 3] for v in variables}
         
         # Detectăm constrângeri (muchii) - suportăm și simbolul ≠
         # Pattern: A-B, A!=B, A ≠ B, muchii: A-B, B-C
@@ -437,6 +451,23 @@ class QuestionParser:
             data['tags'].append('graph-coloring')
         if 'sudoku' in text_lower:
             data['tags'].append('sudoku')
+
+        # Detectăm algoritmii și euristicile cerute
+        # MRV (Minimum Remaining Values)
+        use_mrv = any(kw in text_lower for kw in ['mrv', 'minimum remaining values', 'minimum remaining'])
+        data['use_mrv'] = use_mrv
+        
+        # Forward Checking
+        use_fc = any(kw in text_lower for kw in ['forward checking', 'forward-checking', 'fc ', ' fc,', ' fc.'])
+        data['use_fc'] = use_fc
+        
+        # AC-3 (Arc Consistency)
+        use_ac3 = any(kw in text_lower for kw in ['ac-3', 'ac3', 'arc consistency', 'arc-consistency'])
+        data['use_ac3'] = use_ac3
+        
+        # Backtracking (aproape întotdeauna prezent)
+        use_backtracking = 'backtracking' in text_lower or 'back-tracking' in text_lower
+        data['use_backtracking'] = use_backtracking
 
         return data
 

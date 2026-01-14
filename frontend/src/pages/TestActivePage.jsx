@@ -141,7 +141,21 @@ const TestActivePage = () => {
       ...prev,
       [questionId]: {
         ...prev[questionId],
-        [variable]: value === '' ? '' : parseInt(value, 10),
+        assignments: {
+          ...prev[questionId]?.assignments,
+          [variable]: value === '' ? '' : parseInt(value, 10),
+        },
+      },
+    }));
+  };
+
+  const handleCspHasSolutionChange = (value) => {
+    const questionId = questions[currentIndex].id;
+    setUserAnswers((prev) => ({
+      ...prev,
+      [questionId]: {
+        ...prev[questionId],
+        hasSolution: value,
       },
     }));
   };
@@ -262,17 +276,26 @@ const TestActivePage = () => {
             break;
 
           case 'csp':
-            const cleanedCspAnswer = {};
-            Object.entries(answer || {}).forEach(([key, val]) => {
-              if (val !== '' && val !== undefined) {
-                cleanedCspAnswer[key] = parseInt(val, 10);
-              }
-            });
-            payload = {
-              user_answer: cleanedCspAnswer,
+            const cspAnswer = answer || {};
+            const cspPayload = {
               raw_data: question.data.raw_data,
               template_id: question.data.template_id,
+              has_solution: cspAnswer.hasSolution,
             };
+            
+            if (cspAnswer.hasSolution === true) {
+              const cleanedCspAnswer = {};
+              Object.entries(cspAnswer.assignments || {}).forEach(([key, val]) => {
+                if (val !== '' && val !== undefined) {
+                  cleanedCspAnswer[key] = parseInt(val, 10);
+                }
+              });
+              cspPayload.user_answer = cleanedCspAnswer;
+            } else {
+              cspPayload.user_answer = {};
+            }
+            
+            payload = cspPayload;
             break;
 
           case 'minmax':
@@ -512,35 +535,69 @@ const TestActivePage = () => {
           )}
 
           {type === 'csp' && (
-            <div>
-              <label className="block text-sm font-medium text-brand-dark mb-2">
-                Asignează valori pentru fiecare variabilă:
-              </label>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {(data.raw_data?.variables || []).map((variable) => {
-                  const partialAssignment = data.raw_data?.partial_assignment || {};
-                  const isPartial = partialAssignment[variable] !== undefined;
-                  return (
-                    <div key={variable} className="flex items-center gap-2">
-                      <span className="font-mono text-brand-dark font-semibold">{variable}:</span>
-                      <input
-                        type="number"
-                        value={
-                          isPartial
-                            ? partialAssignment[variable]
-                            : userAnswers[questionId]?.[variable] ?? ''
-                        }
-                        onChange={(e) => handleCspAnswerChange(variable, e.target.value)}
-                        disabled={isPartial}
-                        placeholder="?"
-                        className={`flex-1 border border-brand-neutral/30 rounded px-3 py-2 text-brand-dark 
-                                   focus:outline-none focus:ring-2 focus:ring-brand-primary
-                                   ${isPartial ? 'bg-brand-bg cursor-not-allowed' : ''}`}
-                      />
-                    </div>
-                  );
-                })}
+            <div className="space-y-4">
+              {/* Checkbox pentru "Are soluție?" */}
+              <div className="p-3 bg-gray-50 rounded border border-brand-neutral/20">
+                <label className="block text-sm font-medium text-brand-dark mb-2">
+                  Problema are soluție?
+                </label>
+                <div className="flex gap-4">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name={`csp-has-solution-${questionId}`}
+                      checked={userAnswers[questionId]?.hasSolution === true}
+                      onChange={() => handleCspHasSolutionChange(true)}
+                      className="w-4 h-4 text-brand-primary"
+                    />
+                    <span className="text-brand-dark">Da, are soluție</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name={`csp-has-solution-${questionId}`}
+                      checked={userAnswers[questionId]?.hasSolution === false}
+                      onChange={() => handleCspHasSolutionChange(false)}
+                      className="w-4 h-4 text-brand-primary"
+                    />
+                    <span className="text-brand-dark">Nu, nu are soluție</span>
+                  </label>
+                </div>
               </div>
+
+              {/* Câmpurile pentru variabile - afișate doar dacă utilizatorul crede că are soluție */}
+              {userAnswers[questionId]?.hasSolution === true && (
+                <div>
+                  <label className="block text-sm font-medium text-brand-dark mb-2">
+                    Asignează valori pentru fiecare variabilă:
+                  </label>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    {(data.raw_data?.variables || []).map((variable) => {
+                      const partialAssignment = data.raw_data?.partial_assignment || {};
+                      const isPartial = partialAssignment[variable] !== undefined;
+                      return (
+                        <div key={variable} className="flex items-center gap-2">
+                          <span className="font-mono text-brand-dark font-semibold">{variable}:</span>
+                          <input
+                            type="number"
+                            value={
+                              isPartial
+                                ? partialAssignment[variable]
+                                : userAnswers[questionId]?.assignments?.[variable] ?? ''
+                            }
+                            onChange={(e) => handleCspAnswerChange(variable, e.target.value)}
+                            disabled={isPartial}
+                            placeholder="?"
+                            className={`flex-1 border border-brand-neutral/30 rounded px-3 py-2 text-brand-dark 
+                                       focus:outline-none focus:ring-2 focus:ring-brand-primary
+                                       ${isPartial ? 'bg-brand-bg cursor-not-allowed' : ''}`}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
